@@ -3,6 +3,12 @@
 
 Apple 홈페이지 스타일의 순차적 스크롤 애니메이션과 인터랙티브 Pill 시스템을 구현한 프로젝트입니다.
 
+## 애니메이션 미리보기
+
+## 애니메이션 미리보기
+
+[![애니메이션 미리보기](https://www.youtube.com/watch?v=eqZKZOQIHfU)](https://www.youtube.com/watch?v=eqZKZOQIHfU)
+
 ## 주요 특징
 
 - **순차적 애니메이션**: 스케일링 → 높이 축소 → Pill 상승의 자연스러운 흐름
