@@ -7,7 +7,7 @@ Apple 홈페이지 스타일의 순차적 스크롤 애니메이션과 인터랙
 
 ## 애니메이션 미리보기
 
-[![Video Label](http://img.youtube.com/vi/eqZKZOQIHfU/0.jpg)](https://youtu.be/eqZKZOQIHfU)
+[apple pill animation](https://www.youtube.com/watch?v=eqZKZOQIHfU)
 
 ## 주요 특징
 
