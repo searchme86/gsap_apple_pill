@@ -1,7 +1,10 @@
-```markdown
 # Apple-Style Pill Animation System
 
 Apple 홈페이지 스타일의 순차적 스크롤 애니메이션과 인터랙티브 Pill 시스템을 구현한 프로젝트입니다.
+
+## 애니메이션 미리보기
+
+[![포트폴리오 모바일 버전 미리보기](https://img.youtube.com/vi/eqZKZOQIHfU/0.jpg)](https://www.youtube.com/watch?v=eqZKZOQIHfU)
 
 ## 주요 특징
 
@@ -11,15 +14,14 @@ Apple 홈페이지 스타일의 순차적 스크롤 애니메이션과 인터랙
 - **자연스러운 전환**: Transform 제거 시스템으로 부드러운 sticky 효과
 - **모듈화 구조**: 재사용 가능한 컴포넌트 기반 설계
 
-## 애니메이션 미리보기
-
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/eqZKZOQIHfU/0.jpg)](http://www.youtube.com/watch?v=eqZKZOQIHfU 'Video Title')
-
 ## 애니메이션 동작 원리
 
 ### 전체 애니메이션 플로우
 
 Apple의 홈페이지와 같은 자연스러운 스크롤 경험을 제공하기 위해 4개의 독립적인 애니메이션 시스템이 정교하게 연결되어 작동합니다.
+
+```markdown
+
 ```
 
 ┌─────────────────┐ onComplete ┌─────────────────┐ 0.5초 지연 ┌─────────────────┐
@@ -33,6 +35,7 @@ Apple의 홈페이지와 같은 자연스러운 스크롤 경험을 제공하기
 └─────────────────┘ └─────────────────┘ └─────────────────┘
 
 ```
+
 
 #### 동시성과 순차성의 조화
 
