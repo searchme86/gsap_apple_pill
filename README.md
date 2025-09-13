@@ -2,6 +2,10 @@
 
 Apple 홈페이지 스타일의 순차적 스크롤 애니메이션과 인터랙티브 Pill 시스템을 구현한 프로젝트입니다.
 
+## 미리보기 링크
+
+[애니메이션 배포 링크](https://searchme86.github.io/gsap_apple_pill/)
+
 ## 애니메이션 미리보기
 
 [![포트폴리오 모바일 버전 미리보기](https://img.youtube.com/vi/eqZKZOQIHfU/0.jpg)](https://www.youtube.com/watch?v=eqZKZOQIHfU)
