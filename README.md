@@ -270,12 +270,38 @@ p=1.0: transform 제거, CSS sticky 완전 활성화
 
 ### 모듈 구성
 
-├── main.js # 전체 시스템 초기화 및 통합
-├── config.js # DOM 요소 및 설정값 관리
-├── gsapAnimations.js # 스케일/높이 애니메이션
-├── pillAnimations.js # Pill 상승/확장/사라짐 애니메이션
-├── responsiveManager.js # 반응형 pin-spacer 관리
-└── transformSystem.js # Transform 제거 시스템
+프로젝트는 기능별로 분리된 6개의 핵심 모듈로 구성되어 있습니다:
+
+**메인 시스템:**
+
+- main.js - 전체 시스템 초기화 및 통합 관리
+- config.js - DOM 요소 및 애니메이션 설정값 중앙 관리
+
+**애니메이션 모듈:**
+
+- gsapAnimations.js - 스케일 및 높이 축소 애니메이션 처리
+- pillAnimations.js - Pill 상승, 확장, 사라짐 애니메이션 타임라인 관리
+
+**지원 시스템:**
+
+- responsiveManager.js - 반응형 pin-spacer 높이 계산 및 적용
+- transformSystem.js - GSAP transform에서 CSS sticky로의 부드러운 전환
+
+**각 모듈의 역할:**
+
+- main.js: GSAP 초기화, 모든 모듈 연결, DOM 준비 상태 확인, 전역 오류 처리
+- config.js: DOM 요소 참조, 애니메이션 설정값, 상태 추적 객체, 디버그 로그 함수
+- gsapAnimations.js: 스케일 애니메이션 (1.0 → 0.6667), 높이 애니메이션 (100vh → 60vh), pin-spacer 동기화
+- pillAnimations.js: 상승 타임라인 (800px → -120px), 확장 타임라인 (40px → 180px), 사라짐 타임라인
+- responsiveManager.js: 뷰포트 크기 감지, 모바일/데스크톱 높이 계산, resize 이벤트 디바운스 처리
+- transformSystem.js: 65%-90% 구간 transform 제거, 사인 함수 이징, CSS sticky 전환
+
+**모듈 간 의존성:**
+
+- main.js가 모든 모듈을 import하여 초기화 순서 제어
+- config.js는 모든 모듈에서 공통으로 사용하는 설정값 제공
+- gsapAnimations.js에서 pillAnimations.js로 onComplete 콜백 연결
+- responsiveManager.js는 모든 애니메이션 모듈에서 호출되어 반응형 처리
 
 ### 핵심 함수들
 
