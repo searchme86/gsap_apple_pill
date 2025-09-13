@@ -20,10 +20,6 @@ Apple 홈페이지 스타일의 순차적 스크롤 애니메이션과 인터랙
 
 Apple의 홈페이지와 같은 자연스러운 스크롤 경험을 제공하기 위해 4개의 독립적인 애니메이션 시스템이 정교하게 연결되어 작동합니다.
 
-```markdown
-
-```
-
 ┌─────────────────┐ onComplete ┌─────────────────┐ 0.5초 지연 ┌─────────────────┐
 │ 스케일 애니메이션 │ ─────────────→ │ 높이 축소 애니메이션 │ ─────────────→ │ 자연스러운 전환 │
 │ (400vh 구간) │ │ (2초 duration) │ │ │
@@ -34,9 +30,6 @@ Apple의 홈페이지와 같은 자연스러운 스크롤 경험을 제공하기
 │ (즉시 실행) │ │ (ScrollTrigger) │ ─────────────→ │ (90% 지점까지) │
 └─────────────────┘ └─────────────────┘ └─────────────────┘
 
-```
-
-
 #### 동시성과 순차성의 조화
 
 1. **순차적 실행**: 스케일 → 높이 애니메이션은 `onComplete` 콜백으로 연결
@@ -45,15 +38,11 @@ Apple의 홈페이지와 같은 자연스러운 스크롤 경험을 제공하기
 
 #### 시간축 분석
 
-```
-
 시간축: 0s ────── 2s ────── 4s ────── 6s ────── 8s ──────
 스케일: [████████████████████████████████████]
 높이: [████████████]
 Pill: [██████████████████]
 Transform: [████████████]
-
-````
 
 ### 핵심 애니메이션 단계
 
@@ -68,10 +57,10 @@ gsap.to(domElementsConfig.scalableDeviceMockup, {
     scrub: 1, // 스크롤과 1:1 동기화
     start: 'top top',
     end: '+=400vh', // 뷰포트 높이의 4배만큼 스크롤
-    onComplete: () => adaptingReduceHeight()
-  }
+    onComplete: () => adaptingReduceHeight(),
+  },
 });
-````
+```
 
 **핵심 특징**:
 
@@ -82,12 +71,10 @@ gsap.to(domElementsConfig.scalableDeviceMockup, {
 
 **수학적 계산**:
 
-```
-스크롤 거리: 400vh (뷰포트 높이 * 4)
+스크롤 거리: 400vh (뷰포트 높이 _ 4)
 스케일 변화: 1.0 → 0.6667 (33.33% 축소)
 진행률 = 현재 스크롤 / 400vh
-현재 스케일 = 1.0 - (진행률 * 0.3333)
-```
+현재 스케일 = 1.0 - (진행률 _ 0.3333)
 
 #### Phase 2: 자연스러운 높이 축소 애니메이션
 
@@ -173,12 +160,10 @@ export const createPillRiseAnimationTimeline = () => {
 
 **애니메이션 타이밍 차트**:
 
-```
 Timeline: 0s ─── 0.9s ──── 2.0s
-상승:     [████████████]
-확장:            [██████████████]
-겹침:            [███] (0.9s~1.1s 구간)
-```
+상승: [████████████]
+확장: [██████████████]
+겹침: [███] (0.9s~1.1s 구간)
 
 **CSS 변수 시스템**:
 
@@ -268,30 +253,26 @@ export const initializeTransformRemovalSystem = () => {
 
 **Transform → Sticky 전환의 수학적 모델**:
 
-```
 진행률(p) = 0 → 1
-이징 함수 = sin(p * π/2)
-Y 위치 = -120 + (120 * 이징값)
+이징 함수 = sin(p _ π/2)
+Y 위치 = -120 + (120 _ 이징값)
 
 p=0.0: Y=-120px (GSAP transform 완전 제어)
-p=0.5: Y=-75px  (중간 전환 지점)
-p=0.9: Y=-12px  (거의 CSS sticky 준비)
-p=0.99: Y=-1px  (transform 제거 직전)
+p=0.5: Y=-75px (중간 전환 지점)
+p=0.9: Y=-12px (거의 CSS sticky 준비)
+p=0.99: Y=-1px (transform 제거 직전)
 p=1.0: transform 제거, CSS sticky 완전 활성화
-```
 
 ## 핵심 코드 구조
 
 ### 모듈 구성
 
-```
-├── main.js                 # 전체 시스템 초기화 및 통합
-├── config.js              # DOM 요소 및 설정값 관리
-├── gsapAnimations.js      # 스케일/높이 애니메이션
-├── pillAnimations.js      # Pill 상승/확장/사라짐 애니메이션
-├── responsiveManager.js   # 반응형 pin-spacer 관리
-└── transformSystem.js     # Transform 제거 시스템
-```
+├── main.js # 전체 시스템 초기화 및 통합
+├── config.js # DOM 요소 및 설정값 관리
+├── gsapAnimations.js # 스케일/높이 애니메이션
+├── pillAnimations.js # Pill 상승/확장/사라짐 애니메이션
+├── responsiveManager.js # 반응형 pin-spacer 관리
+└── transformSystem.js # Transform 제거 시스템
 
 ### 핵심 함수들
 
@@ -418,18 +399,16 @@ Pill의 폭 확장은 CSS 변수와 전환을 활용하여 구현:
 
 ## 파일 구조
 
-```
 project/
-├── animation_applePill.html    # 메인 HTML
-├── guide_animation_pill.html   # 애니메이션 가이드
+├── animation_applePill.html # 메인 HTML
+├── guide_animation_pill.html # 애니메이션 가이드
 └── applePill/
-    ├── main.js                 # 시스템 초기화
-    ├── config.js               # 설정 관리
-    ├── gsapAnimations.js       # GSAP 애니메이션
-    ├── pillAnimations.js       # Pill 애니메이션
-    ├── responsiveManager.js    # 반응형 관리
-    └── transformSystem.js      # Transform 시스템
-```
+├── main.js # 시스템 초기화
+├── config.js # 설정 관리
+├── gsapAnimations.js # GSAP 애니메이션
+├── pillAnimations.js # Pill 애니메이션
+├── responsiveManager.js # 반응형 관리
+└── transformSystem.js # Transform 시스템
 
 ## 사용법
 
