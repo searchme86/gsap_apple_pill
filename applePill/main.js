@@ -71,7 +71,7 @@ const performSystemInitialization = () => {
     debugLog('- 순차: 원래 방식 (스케일링 → onComplete → height)');
     debugLog('- Pill: 원본 타이밍 (메인 섹션 진입하자마자)');
     debugLog('- 중앙정렬: Flexbox + 절대위치 + translateX(-50%)');
-    debugLog('- 반응형: 360px+ 모바일 90vh, 768px+ 데스크톱 115vh');
+    debugLog('- 반응형: 360px+ 모바일 90vh, 768px+ 데스크톱 125vh');
   } catch (error) {
     // 초기화 과정에서 발생한 오류 처리
     console.error('[ERROR] 시스템 초기화 중 오류 발생:', error);

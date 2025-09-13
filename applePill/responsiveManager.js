@@ -4,7 +4,7 @@
  * 현재 뷰포트 크기에 따라 pin-spacer 높이를 계산하는 함수
  * 모바일과 데스크톱 환경에 맞는 최적의 높이값을 반환
  *
- * @returns {string} CSS 높이값 (예: '90vh', '115vh')
+ * @returns {string} CSS 높이값 (예: '90vh', '125vh')
  */
 export const calculateResponsivePinSpacerHeightByViewport = () => {
   // 현재 브라우저 창의 가로 크기를 가져옴
@@ -13,9 +13,9 @@ export const calculateResponsivePinSpacerHeightByViewport = () => {
   // 이 범위는 대부분의 스마트폰 화면 크기에 해당
   const isMobileDevice =
     currentViewportWidth >= 360 && currentViewportWidth < 768;
-  // 모바일에서는 pinSpacer의 높이를 90vh, 데스크톱에서는 115vh 사용
+  // 모바일에서는 pinSpacer의 높이를 90vh, 데스크톱에서는 125vh 사용
   // vh는 뷰포트 높이의 백분율 단위
-  const responsivePinSpacerHeight = isMobileDevice ? '90vh' : '115vh';
+  const responsivePinSpacerHeight = isMobileDevice ? '90vh' : '125vh';
   return responsivePinSpacerHeight;
 };
 
