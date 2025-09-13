@@ -73,11 +73,3 @@ export const animationStateTracker = {
   // Transform 속성이 제거되었는지 여부 (CSS transition 활성화용)
   isTransformPropertyRemoved: false,
 };
-
-/**
- * 디버그 로그 출력 함수
- * 개발 모드에서만 로그를 출력하도록 제어 가능
- */
-export const debugLog = (message) => {
-  console.log(`[DEBUG] ${message}`);
-};

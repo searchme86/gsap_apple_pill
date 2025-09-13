@@ -4,7 +4,6 @@ import {
   domElementsConfig,
   pillAnimationConfiguration,
   animationStateTracker,
-  debugLog,
 } from './config.js';
 
 /**
@@ -14,8 +13,6 @@ import {
  * @returns {gsap.timeline} GSAP 타임라인 객체
  */
 export const createPillRiseAnimationTimeline = () => {
-  // debugLog('Pill 상승 Timeline 생성');
-
   // GSAP 타임라인 생성 (일시정지 상태로 시작)
   const pillRiseTimeline = gsap.timeline({
     // 일단 정지된 상태로 타임라인을 생성함
@@ -25,8 +22,6 @@ export const createPillRiseAnimationTimeline = () => {
      * 애니메이션 시작 시 콜백
      */
     onStart: () => {
-      debugLog('Pill 상승 애니메이션 시작');
-
       // 애니메이션 상태 업데이트
       animationStateTracker.isCurrentlyAnimating = true;
       animationStateTracker.isReverseDirection = false;
@@ -40,8 +35,6 @@ export const createPillRiseAnimationTimeline = () => {
      * 애니메이션 완료 시 콜백
      */
     onComplete: () => {
-      debugLog('Pill 상승 완료 - 인터랙티브 모드');
-
       // 애니메이션 상태 업데이트
       animationStateTracker.isCurrentlyAnimating = false;
       animationStateTracker.currentAnimationPhase = 'expanded';
@@ -127,8 +120,6 @@ export const createPillDisappearAnimationTimeline = () => {
      * 사라짐 애니메이션 완료 시 콜백
      */
     onComplete: () => {
-      debugLog('Pill 사라짐 완료');
-
       // 애니메이션 상태 초기화
       animationStateTracker.isCurrentlyAnimating = false;
       animationStateTracker.isReverseDirection = false;
@@ -220,7 +211,6 @@ export const initializePillAnimationController = () => {
 
       // 원본처럼 즉시 실행
       pillRiseTimeline.restart();
-      debugLog('✅ 원본과 동일 - 메인 섹션 진입하자마자 Pill 상승!');
     },
 
     /**
@@ -232,7 +222,6 @@ export const initializePillAnimationController = () => {
         animationStateTracker.isCurrentlyAnimating &&
         !animationStateTracker.isReverseDirection
       ) {
-        debugLog('상승 중단 → 사라짐 전환');
         pillRiseTimeline.kill();
       }
 

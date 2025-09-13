@@ -1,6 +1,6 @@
 // animation_applePill.html/scripts/gsapAnimations.js - GSAP 스케일 및 높이 애니메이션 관리
 
-import { domElementsConfig, debugLog } from './config.js';
+import { domElementsConfig } from './config.js';
 import { applyFianlPinSpacerHeight } from './responsiveManager.js';
 
 /**
@@ -28,7 +28,6 @@ export const adaptingReduceHeight = () => {
       onComplete: () => {
         // 최종 반응형 pin-spacer 높이 설정
         applyFianlPinSpacerHeight();
-        // debugLog('최종 pin-spacer 반응형 height로 고정');
       },
     });
 

@@ -1,10 +1,6 @@
 // animation_applePill.html/scripts/transformSystem.js - Transform 속성 제거 시스템
 
-import {
-  domElementsConfig,
-  animationStateTracker,
-  debugLog,
-} from './config.js';
+import { domElementsConfig, animationStateTracker } from './config.js';
 
 /**
  * Transform 제거 시스템을 초기화하는 함수
@@ -51,12 +47,6 @@ export const initializeTransformRemovalSystem = () => {
       const currentOpacity = 0.95 + 0.05 * easedProgressValue;
       domElementsConfig.animatedPillWrapper.style.opacity = currentOpacity;
 
-      debugLog(
-        `부드러운 동기화: ${currentYPosition.toFixed(1)}px (${(
-          progressValue * 100
-        ).toFixed(1)}%)`
-      );
-
       // 애니메이션이 거의 완료되었는지 확인 (99% 이상)
       const isTransformCompleted = progressValue >= 0.99;
 
@@ -68,8 +58,6 @@ export const initializeTransformRemovalSystem = () => {
 
         // 상태 추적기 업데이트
         animationStateTracker.isTransformPropertyRemoved = true;
-
-        debugLog('Transform 완전 제거 - CSS bottom 활성화');
       }
     },
 
@@ -78,13 +66,9 @@ export const initializeTransformRemovalSystem = () => {
      * Transform 제거 지점을 역방향으로 통과할 때 호출
      */
     onLeaveBack: () => {
-      debugLog('Transform 제거 지점 역방향 통과');
-
       // transform 제거 상태를 false로 리셋
       // 다시 GSAP transform이 Pill 위치를 제어하게 됨
       animationStateTracker.isTransformPropertyRemoved = false;
     },
   });
-
-  debugLog('Transform 제거 시스템 초기화 완료');
 };
