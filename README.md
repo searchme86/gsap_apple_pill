@@ -390,7 +390,7 @@ export const calculateResponsivePinSpacerHeightByViewport = () => {
   const currentViewportWidth = window.innerWidth;
   const isMobileDevice =
     currentViewportWidth >= 360 && currentViewportWidth < 768;
-  return isMobileDevice ? '90vh' : '125vh';
+  return isMobileDevice ? '90vh' : '115vh';
 };
 
 export const applyFianlPinSpacerHeight = (customHeight = null) => {
