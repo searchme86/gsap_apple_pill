@@ -15,7 +15,7 @@ export const calculateResponsivePinSpacerHeightByViewport = () => {
     currentViewportWidth >= 360 && currentViewportWidth < 768;
   // 모바일에서는 pinSpacer의 높이를 90vh, 데스크톱에서는 125vh 사용
   // vh는 뷰포트 높이의 백분율 단위
-  const responsivePinSpacerHeight = isMobileDevice ? '90vh' : '125vh';
+  const responsivePinSpacerHeight = isMobileDevice ? '90vh' : '110vh';
   return responsivePinSpacerHeight;
 };
 
