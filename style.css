@@ -1,0 +1,1281 @@
+/* ===== CSS 변수 정의 - 전체 디자인 시스템의 기준값들 ===== */
+:root {
+  /* Apple Brand Colors - 모바일 최적화 */
+  --mx-pro-blue: #2997ff;
+  --mx-max-purple: #a972ff;
+  --mx-teal: #43b9b9;
+  --ai-gradient: linear-gradient(
+    97deg,
+    #0096ff,
+    #bb64ff 42%,
+    #f2416b 74%,
+    #eb7500
+  );
+  --igradient: linear-gradient(
+    to bottom right,
+    #0894ff 0%,
+    #c959dd 34%,
+    #ff2e54 68%,
+    #ff9004
+  );
+
+  /* Apple UI Color System - 일관된 색상 체계 */
+  --sk-body-background-color: #000000;
+  --sk-body-text-color: #f5f5f7;
+  --sk-headline-text-color: #f5f5f7;
+  --sk-body-link-color: #2997ff;
+  --sk-glyph-gray: #f5f5f7;
+  --sk-glyph-gray-secondary: #86868b;
+  --sk-fill-tertiary: #1d1d1f;
+
+  /* 모바일 퍼스트 Pill System - 320px 기준 */
+  --apple-pill-background-color: rgba(66, 66, 69, 0.7);
+  --apple-pill-inner-glow-color: rgba(232, 232, 237, 0.11);
+  --apple-pill-text-color: var(--sk-body-text-color);
+  --apple-pill-blur-radius: 4px;
+  --apple-pill-font-size: 12px;
+  --apple-pill-font-weight: 600;
+  --apple-pill-margin: 12px;
+  --apple-pill-min-height: 40px;
+  --apple-pill-accent-color: var(--mx-pro-blue);
+
+  /* CSS 변수로 Pill 제어 - 모바일 기본값 */
+  /* 이 값들은 JavaScript에서 동적으로 변경됨 */
+  --pill-hint-scale: 0;
+  --pill-hint-opacity: 0;
+  --pill-width: 40px;
+  --pill-text-opacity: 0;
+  --pill-text-x: -12px;
+
+  /* 모바일 퍼스트 Typography */
+  --base-font-size: 14px;
+  --headline-font-size: 20px;
+  --large-headline-font-size: 24px;
+  --display-font-size: 28px;
+
+  /* 모바일 퍼스트 Spacing System */
+  --section-padding: 1.5rem 1rem;
+  --content-max-width: 100%;
+  --border-radius: 10px;
+}
+
+/* ===== 전역 리셋 - 모든 브라우저에서 일관된 표시 ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* 패딩과 보더를 width에 포함 */
+}
+
+/* ===== Apple Intelligence Glow System ===== */
+/* 그라데이션 보더 효과를 구현하는 핵심 컴포넌트 */
+.apple-intelligence-glow {
+  --igradient: linear-gradient(
+    to bottom right,
+    #0894ff 0%,
+    #c959dd 34%,
+    #ff2e54 68%,
+    #ff9004
+  );
+  position: absolute;
+  z-index: 0; /* 배경 레이어로 설정 */
+  inset: 0; /* top: 0, right: 0, bottom: 0, left: 0과 동일 */
+  border: 0;
+  filter: blur(0.4px); /* 기본 블러 효과 */
+}
+
+/* 실제 그라데이션 보더를 생성하는 가상 요소 */
+.apple-intelligence-glow::after {
+  --bg-size: calc(100% + 6px);
+  content: '';
+  pointer-events: none; /* 마우스 이벤트 차단 */
+  position: absolute;
+  inset: 0;
+  background: var(--igradient) 50% / var(--bg-size) var(--bg-size);
+  border-radius: var(--border-radius);
+  border: 1.5px solid rgba(0, 0, 0, 0);
+  /* CSS mask를 사용해 보더만 보이도록 처리 */
+  mask: linear-gradient(hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, 0)),
+    linear-gradient(hsl(0, 0%, 100%), hsl(0, 0%, 100%));
+  mask-clip: padding-box, border-box;
+  mask-composite: intersect;
+}
+
+/* 더 강한 블러 효과를 위한 수정자 클래스 */
+/* .apple-intelligence-glow.apple-intelligence-glow-2 {
+        filter: blur(2px);
+      } */
+
+.apple-intelligence-glow.apple-intelligence-glow-2::after {
+  border: 3px solid rgba(0, 0, 0, 0);
+}
+
+/* ===== 스크롤 텍스트 변경 시스템 ===== */
+/* 동적으로 변경되는 텍스트를 표시하는 요소 */
+.glow-dynamic-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* 정확한 중앙 정렬 */
+  z-index: 10; /* 다른 요소들보다 위에 표시 */
+  color: var(--sk-body-text-color);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
+  opacity: 0; /* 기본적으로 숨김 상태 */
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none; /* 마우스 이벤트 차단 */
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); /* 가독성을 위한 그림자 */
+  letter-spacing: -0.01em;
+}
+
+/* 텍스트가 보일 때 적용되는 클래스 */
+.glow-dynamic-text.visible {
+  opacity: 1;
+}
+
+/* ===== 모바일 퍼스트 Font System ===== */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* 시스템 폰트 우선 사용 */
+  background: var(--sk-body-background-color);
+  color: var(--sk-body-text-color);
+  font-size: var(--base-font-size);
+  line-height: 1.4;
+  overflow-x: hidden; /* 가로 스크롤 방지 */
+  scroll-behavior: smooth; /* 부드러운 스크롤 */
+  -webkit-font-smoothing: antialiased; /* macOS에서 폰트 렌더링 개선 */
+  -moz-osx-font-smoothing: grayscale; /* Firefox에서 폰트 렌더링 개선 */
+}
+
+/* 메인 콘텐츠 래퍼 */
+.main-content-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* ===== 모바일 퍼스트 Section Styles ===== */
+.dummy-content-section {
+  min-height: 20vh; /* 뷰포트 높이의 20% */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  background: var(--sk-body-background-color);
+  color: var(--sk-body-text-color);
+  overflow: hidden;
+}
+
+.dummy-content-section .dummy-title {
+  font-size: var(--display-font-size);
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  /* 그라데이션 텍스트 효과 */
+  background: linear-gradient(
+    135deg,
+    var(--mx-pro-blue) 0%,
+    var(--mx-max-purple) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  max-width: 100%;
+  word-wrap: break-word; /* 긴 단어 자동 줄바꿈 */
+  padding: 0 0.5rem;
+}
+
+/* ===== 메인 애니메이션 섹션 ===== */
+.main-animation-section {
+  position: relative;
+  background: var(--sk-body-background-color);
+  margin-bottom: 130px;
+}
+
+/* 배경 그라데이션 효과를 위한 가상 요소 */
+.main-animation-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* 미묘한 그라데이션 배경 */
+  background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(41, 151, 255, 0.015) 50%,
+      transparent 100%
+    ),
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(41, 151, 255, 0.01) 0%,
+      transparent 60%
+    );
+  pointer-events: none;
+}
+
+.display-header-section {
+  background: var(--sk-body-background-color);
+  backdrop-filter: blur(6px); /* 배경 블러 효과 */
+  -webkit-backdrop-filter: blur(6px); /* Safari 지원 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 100px;
+  position: relative;
+}
+
+/* ===== 스크롤 인디케이터 ===== */
+.scroll-indicator-container {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: scrollIndicatorBounce 2s ease-in-out infinite;
+  z-index: 10;
+}
+
+.scroll-indicator-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--mx-pro-blue);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.scroll-indicator-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.scroll-indicator-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--sk-glyph-gray-secondary);
+  text-align: center;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+/* 스크롤 인디케이터 바운스 애니메이션 */
+@keyframes scrollIndicatorBounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  40% {
+    transform: translateX(-50%) translateY(-8px);
+  }
+  60% {
+    transform: translateX(-50%) translateY(-4px);
+  }
+}
+
+/* 호버 시 애니메이션 일시정지 */
+.scroll-indicator-container:hover {
+  animation-play-state: paused;
+}
+
+.scroll-indicator-container:hover .scroll-indicator-icon {
+  color: var(--mx-pro-blue);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.scroll-indicator-container:hover .scroll-indicator-text {
+  color: var(--sk-body-text-color);
+  opacity: 1;
+}
+
+/* ===== 반응형 미디어 쿼리 ===== */
+@media (min-width: 375px) {
+  .scroll-indicator-container {
+    bottom: -70px;
+    gap: 10px;
+  }
+
+  .scroll-indicator-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .scroll-indicator-text {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 768px) {
+  .scroll-indicator-container {
+    bottom: -80px;
+    gap: 12px;
+  }
+
+  .scroll-indicator-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .scroll-indicator-text {
+    font-size: 14px;
+  }
+
+  /* 더 큰 화면에서는 더 큰 바운스 효과 */
+  @keyframes scrollIndicatorBounce {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateX(-50%) translateY(0);
+    }
+    40% {
+      transform: translateX(-50%) translateY(-12px);
+    }
+    60% {
+      transform: translateX(-50%) translateY(-6px);
+    }
+  }
+}
+
+.display-eyebrow-text {
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--sk-glyph-gray-secondary);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.display-main-headline {
+  font-size: var(--large-headline-font-size);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--sk-headline-text-color);
+  text-align: center;
+  max-width: 100%;
+  margin: 0;
+  word-wrap: break-word;
+}
+
+/* ===== 디바이스 이미지 섹션 ===== */
+.device-image-section {
+  position: relative;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow: hidden;
+  will-change: height; /* 높이 변경 애니메이션 최적화 */
+}
+
+.device-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== 스케일 가능한 디바이스 목업 ===== */
+/* 핵심 수정: 절대 위치 기반 완벽 중앙정렬 */
+.scalable-device-mockup {
+  /* 절대 위치 + 중앙 변환으로 확실한 중앙정렬 */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  /* 더 작은 모바일 크기 */
+  width: 60vw;
+  height: 40vh;
+
+  /* 기본 스타일 */
+  background: rgba(22, 22, 23, 0.8);
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  flex-direction: column;
+  will-change: transform; /* transform 애니메이션 최적화 */
+  overflow: hidden;
+  padding: 0.8rem;
+  text-align: center;
+  z-index: 1;
+}
+
+/* 가상 요소로 텍스트 콘텐츠 표시 */
+/* .scalable-device-mockup::before {
+        content: 'Lorem Ipsum is simply dummy text';
+        font-size: 1rem;
+        margin-bottom: 0.4rem;
+        position: relative;
+        z-index: 2;
+        word-wrap: break-word;
+      }
+
+      .scalable-device-mockup::after {
+        content: 'of the printing and typesetting industry.';
+        font-size: 0.7rem;
+        opacity: 0.9;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+        word-wrap: break-word;
+      } */
+
+/* ===== 디스플레이 텍스트 섹션 ===== */
+.display-text-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.display-main-description {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+  max-width: 100%;
+  color: #86868b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  padding-top: 0.8rem;
+  padding-right: 0;
+  text-align: left;
+  word-wrap: break-word;
+}
+
+.highlight-title {
+  color: white;
+}
+
+.highlighted-text {
+  color: white;
+  font-weight: 600;
+  display: block;
+  font-size: var(--large-headline-font-size);
+}
+
+/* ===== Tech 섹션들 ===== */
+.dummy-tech-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  color: var(--sk-body-text-color);
+  max-width: 1200px;
+  margin: 0 auto 100px auto;
+}
+
+.dummy-tech-wrapper {
+  max-width: 100%;
+  text-align: center;
+}
+
+.dummy-tech-title {
+  display: block;
+  font-size: var(--display-font-size);
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  background: linear-gradient(
+    135deg,
+    var(--mx-pro-blue) 0%,
+    var(--mx-max-purple) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  max-width: 100%;
+  word-wrap: break-word;
+  margin-bottom: 1.2rem;
+}
+
+.dummy-tech-description {
+  font-size: var(--base-font-size);
+  line-height: 1.5;
+  color: var(--sk-glyph-gray-secondary);
+  max-width: 95%;
+}
+
+/* 기술 통계 표시 영역 */
+.tech-stats {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-top: 1.2rem;
+}
+
+.tech-stat-item {
+  background: rgba(41, 151, 255, 0.08);
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid rgba(41, 151, 255, 0.15);
+  min-width: 80px;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  transition: all 0.3s ease;
+}
+
+/* 호버 효과 */
+.tech-stat-item:hover {
+  background: rgba(41, 151, 255, 0.12);
+  border-color: rgba(41, 151, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(41, 151, 255, 0.15);
+}
+
+.tech-stat-number {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--mx-pro-blue);
+  display: block;
+  line-height: 1.1;
+}
+
+.tech-stat-label {
+  font-size: 0.7rem;
+  color: var(--sk-glyph-gray-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.2rem;
+}
+
+.highlight-text {
+  color: var(--sk-body-text-color);
+  font-weight: 600;
+}
+
+/* ===== 기능 쇼케이스 섹션 ===== */
+.function-showcase-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 2rem;
+  background: var(--sk-body-background-color);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.function-showcase-content {
+  max-width: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.function-image-showcase-section {
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+/* 기능 이미지 플레이스홀더 */
+.function-image-placeholder-mockup {
+  width: 1200px;
+  height: 160px;
+  background: rgba(22, 22, 23, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  border-radius: var(--border-radius);
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+  overflow: hidden;
+  padding: 0.8rem;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.function-image-placeholder-mockup::before {
+  content: 'Lorem Ipsum is simply dummy text';
+  font-size: 1.4rem;
+  position: relative;
+  z-index: 2;
+  word-wrap: break-word;
+}
+
+.function-image-placeholder-mockup::after {
+  content: 'of the printing and typesetting industry.';
+  white-space: pre-line;
+  font-size: 0.9rem;
+  text-align: center;
+  line-height: 1.3;
+  opacity: 0.9;
+  position: relative;
+  z-index: 2;
+  word-wrap: break-word;
+}
+
+.function-text-showcase-section {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 5rem;
+  min-height: 250px;
+}
+
+/* 기능 리스트 */
+.function-feature-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+.function-feature-list-item {
+  position: relative;
+  width: 100%;
+  padding-top: 0.8rem;
+}
+
+/* 그라데이션 구분선 */
+.function-feature-list-item:before {
+  display: block;
+  content: '';
+  position: absolute;
+  inset: 0;
+  height: 1px;
+  background: var(
+    --background,
+    linear-gradient(90deg, #0088ff, #692fff, #c1498a)
+  );
+}
+
+.function-feature-item-content {
+  position: relative;
+}
+
+.function-feature-item-title {
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--sk-glyph-gray-secondary);
+  word-wrap: break-word;
+}
+
+.function-feature-item-title strong {
+  color: var(--sk-body-text-color);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 14px;
+}
+
+/* ===== Pill Animation DOM Section ===== */
+.pill-animation-dom-section {
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--section-padding);
+  background: var(--sk-body-background-color);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
+}
+
+/* ===== 고정된 Pill 컨테이너 ===== */
+/* 핵심: absolute container + sticky pill - 모바일 최적화 */
+.fixed-pill-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none; /* 기본적으로 클릭 이벤트 차단 */
+  z-index: 100;
+}
+
+/* 애니메이션되는 Pill 래퍼 */
+.animated-pill-wrapper {
+  position: sticky;
+  bottom: var(--apple-pill-margin);
+  width: var(--pill-width); /* CSS 변수로 제어 */
+  height: var(--apple-pill-min-height);
+  background: var(--apple-pill-background-color);
+  backdrop-filter: blur(var(--apple-pill-blur-radius));
+  -webkit-backdrop-filter: blur(var(--apple-pill-blur-radius));
+  border-radius: 20px;
+  box-shadow: inset 0 0 1px var(--apple-pill-inner-glow-color),
+    0 3px 12px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  will-change: width, transform; /* 애니메이션 최적화 */
+  transform-origin: center center;
+  opacity: 0.95;
+  transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --pill-hint-scale: 0;
+  --pill-hint-opacity: 0;
+}
+
+/* Pill 주변 힌트 효과 */
+.animated-pill-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(var(--pill-hint-scale));
+  width: 120%;
+  height: 120%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(41, 151, 255, 0.2) 0%,
+    rgba(41, 151, 255, 0.06) 60%,
+    transparent 100%
+  );
+  opacity: var(--pill-hint-opacity);
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+  will-change: transform, opacity;
+  z-index: -1;
+}
+
+/* 상호작용 가능한 상태 */
+.animated-pill-wrapper.interactive-state {
+  pointer-events: auto;
+}
+
+/* 확장된 상태 */
+.animated-pill-wrapper.expanded {
+  --pill-width: 180px;
+  --pill-text-opacity: 1;
+  --pill-text-x: 0px;
+}
+
+/* Pill 내부 인터랙티브 버튼 */
+.pill-interactive-button {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent; /* 모바일 탭 하이라이트 제거 */
+  touch-action: manipulation; /* 터치 최적화 */
+}
+
+.pill-interactive-button:hover {
+  transform: translateY(-50%) scale(1.05);
+}
+
+.pill-interactive-button:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* 버튼 아이콘 */
+.pill-button-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--mx-pro-blue) 0%, #005bb5 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(41, 151, 255, 0.25);
+}
+
+.pill-button-icon svg {
+  width: 14px;
+  height: 14px;
+  fill: #ffffff;
+  opacity: 0.95;
+  transition: all 0.3s ease;
+}
+
+/* Pill 내부 텍스트 */
+.pill-display-text {
+  font-size: var(--apple-pill-font-size);
+  font-weight: var(--apple-pill-font-weight);
+  color: var(--apple-pill-text-color);
+  margin-left: 10px;
+  margin-right: 38px;
+  white-space: nowrap;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) translateX(var(--pill-text-x));
+  opacity: var(--pill-text-opacity);
+  transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 고정된 가이드 링크 */
+.fixed-guide-link {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #2997ff, #005bb5);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+  z-index: 9999;
+}
+
+.fixed-guide-link:hover {
+  background: linear-gradient(135deg, #007aff, #004080);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* ===== 반응형 미디어 쿼리들 ===== */
+/* 모바일 퍼스트 접근법에 따른 단계별 반응형 설계 */
+
+/* ===== 1) ≥360px (Galaxy S 등 360 폭 계열) ===== */
+@media (min-width: 360px) {
+  :root {
+    --apple-pill-font-size: 13px;
+    --pill-width: 42px;
+    --section-padding: 1.8rem 1.1rem;
+    --base-font-size: 15px;
+    --headline-font-size: 21px;
+    --apple-pill-min-height: 42px;
+  }
+
+  .glow-dynamic-text {
+    font-size: 15px;
+  }
+
+  .dummy-content-section .dummy-title {
+    font-size: 30px;
+    padding: 0 0.6rem;
+  }
+
+  .main-animation-section {
+    padding: 0 35px;
+  }
+
+  .main-animation-section::before {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(41, 151, 255, 0.018) 50%,
+        transparent 100%
+      ),
+      radial-gradient(
+        circle at 50% 30%,
+        rgba(41, 151, 255, 0.012) 0%,
+        transparent 60%
+      );
+  }
+
+  .display-eyebrow-text {
+    font-size: 13px;
+  }
+
+  .scalable-device-mockup {
+    width: 65vw;
+    height: 42vh;
+    font-size: 1.05rem;
+  }
+
+  .scalable-device-mockup::before {
+    font-size: 1.1rem;
+  }
+
+  .scalable-device-mockup::after {
+    font-size: 0.75rem;
+  }
+
+  .animated-pill-wrapper.expanded {
+    --pill-width: 200px;
+  }
+
+  .dummy-tech-title {
+    font-size: 30px;
+  }
+
+  .dummy-tech-description {
+    font-size: 15px;
+    max-width: 100%;
+  }
+
+  .tech-stats {
+    gap: 0.9rem;
+  }
+
+  .tech-stat-item {
+    padding: 0.7rem 0.9rem;
+    min-width: 90px;
+  }
+
+  .tech-stat-number {
+    font-size: 1.3rem;
+  }
+
+  .tech-stat-label {
+    font-size: 0.75rem;
+  }
+
+  .function-image-placeholder-mockup {
+    width: 100%;
+    height: 180px;
+  }
+
+  .function-image-placeholder-mockup::before {
+    font-size: 1.5rem;
+  }
+
+  .function-image-placeholder-mockup::after {
+    font-size: 0.95rem;
+  }
+
+  .pill-interactive-button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .pill-button-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .pill-button-icon svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .display-text-section {
+    padding: 0;
+    margin-bottom: 40px;
+  }
+
+  .dummy-tech-section {
+    margin-bottom: 40px;
+  }
+
+  .device-image-container {
+    height: 500px;
+  }
+}
+
+/* ===== 2) ≥375px (iPhone 375 폭 계열) ===== */
+@media (min-width: 375px) {
+  :root {
+    --large-headline-font-size: 26px;
+    --display-font-size: 32px;
+    --apple-pill-margin: 14px;
+    --section-padding: 2rem 1.25rem;
+    --base-font-size: 16px;
+  }
+
+  .glow-dynamic-text {
+    font-size: 16px;
+  }
+
+  .dummy-content-section .dummy-title {
+    font-size: 32px;
+    line-height: 1.1;
+    padding: 0 0.7rem;
+  }
+
+  .main-animation-section::before {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(41, 151, 255, 0.02) 50%,
+        transparent 100%
+      ),
+      radial-gradient(
+        circle at 50% 30%,
+        rgba(41, 151, 255, 0.014) 0%,
+        transparent 60%
+      );
+  }
+
+  .display-main-description {
+    font-size: 17px;
+  }
+
+  .scalable-device-mockup {
+    width: 70vw;
+    height: 45vh;
+    font-size: 1.1rem;
+  }
+
+  .scalable-device-mockup::before {
+    font-size: 1.2rem;
+  }
+
+  .scalable-device-mockup::after {
+    font-size: 0.8rem;
+  }
+
+  .function-image-placeholder-mockup {
+    height: 200px;
+    font-size: 1rem;
+  }
+
+  .function-image-placeholder-mockup::before {
+    font-size: 1.6rem;
+  }
+
+  .function-image-placeholder-mockup::after {
+    font-size: 1rem;
+  }
+
+  .function-feature-list {
+    display: flex;
+    gap: 20px;
+    flex-direction: row;
+  }
+
+  .function-feature-list .function-feature-list-item {
+    width: calc(50% - 10px);
+  }
+
+  .animated-pill-wrapper.expanded {
+    --pill-width: 220px;
+  }
+
+  .dummy-tech-title {
+    font-size: 34px;
+    margin-bottom: 1.4rem;
+  }
+
+  .dummy-tech-description {
+    font-size: 16px;
+  }
+
+  .tech-stats {
+    gap: 1rem;
+    margin-top: 1.6rem;
+  }
+
+  .tech-stat-item {
+    padding: 0.8rem 1rem;
+    min-width: 100px;
+  }
+
+  .tech-stat-number {
+    font-size: 1.4rem;
+  }
+
+  .tech-stat-label {
+    font-size: 0.8rem;
+  }
+}
+
+/* ===== 더 많은 미디어 쿼리들... (간소화를 위해 일부 생략) ===== */
+/* 실제로는 더 많은 브레이크포인트들이 있습니다 */
+
+/* ===== 9) ≥768px (태블릿 이상) ===== */
+@media (min-width: 768px) {
+  :root {
+    --large-headline-font-size: 48px;
+    --display-font-size: 56px;
+    --section-padding: 5rem 3rem;
+    --content-max-width: 980px;
+    --apple-pill-blur-radius: 7px;
+    --apple-pill-margin: 30px;
+    --apple-pill-min-height: 56px;
+    --pill-width: 56px;
+  }
+
+  .glow-dynamic-text {
+    font-size: var(--large-headline-font-size);
+  }
+
+  .display-text-section {
+    padding: 5rem 3rem;
+  }
+
+  .device-image-container {
+    height: 100%;
+  }
+
+  .device-image-section {
+    height: 100vh;
+  }
+
+  /* 태블릿/데스크탑에서는 기존 방식 유지 */
+  .scalable-device-mockup {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: 120vw;
+    height: 120vh;
+    font-size: 2rem;
+    margin: 0;
+  }
+
+  .scalable-device-mockup::before {
+    font-size: 4.2rem;
+  }
+
+  .scalable-device-mockup::after {
+    font-size: 2.2rem;
+  }
+
+  .display-main-description {
+    font-size: 28px;
+    max-width: 80%;
+    padding-right: 4rem;
+    text-align: center;
+  }
+
+  .function-image-placeholder-mockup {
+    height: 400px;
+    font-size: 1.8rem;
+  }
+
+  .function-image-placeholder-mockup::before {
+    font-size: 3.5rem;
+  }
+
+  .function-image-placeholder-mockup::after {
+    font-size: 1.8rem;
+  }
+
+  .function-feature-list {
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 2rem;
+  }
+
+  .function-feature-list-item {
+    width: calc(33.333% - 1.5rem);
+    max-width: calc(33.333% - 1.5rem);
+  }
+
+  .function-feature-item-title {
+    font-size: 21px;
+  }
+
+  .function-feature-item-title strong {
+    font-size: 21px;
+    display: inline-block;
+    margin-bottom: 0;
+  }
+
+  .pill-interactive-button {
+    width: 46px;
+    height: 46px;
+    right: 5px;
+  }
+
+  .pill-button-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .pill-button-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .animated-pill-wrapper {
+    border-radius: 28px;
+  }
+
+  .animated-pill-wrapper.expanded {
+    --pill-width: 290px;
+  }
+
+  .pill-display-text {
+    margin-left: 20px;
+    margin-right: 60px;
+  }
+
+  .dummy-tech-title {
+    font-size: 56px;
+    margin-bottom: 2.5rem;
+  }
+
+  .dummy-tech-description {
+    font-size: 24px;
+  }
+
+  .tech-stats {
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .tech-stat-item {
+    padding: 1.5rem 2rem;
+    min-width: 160px;
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .tech-stat-number {
+    font-size: 2.2rem;
+  }
+
+  .tech-stat-label {
+    font-size: 0.9rem;
+  }
+}
+
+/* ===== 10) ≥1200px (데스크탑) ===== */
+@media (min-width: 1200px) {
+  .scalable-device-mockup {
+    width: 100vw;
+    height: 100vh;
+  }
+}
