@@ -8,8 +8,8 @@ import { domElementsConfig, animationStateTracker } from './config.js';
  * 정방향과 역방향 스크롤에 따라 표시될 텍스트를 정의
  */
 export const scrollTextMapping = {
-  forward: 'css의 scale 속성으로 크기가 줄어듭니다', // 정방향 스크롤 시 표시될 텍스트
-  backward: '원래 크기의 속성으로 돌아갑니다', // 역방향 스크롤 시 표시될 텍스트
+  forward: 'scale 속성으로 크기가 줄어들고, 다음 텍스트가 올라옵니다.', // 정방향 스크롤 시 표시될 텍스트
+  backward: '원래 크기의 속성으로 돌아가고, 다음 텍스트가 내려갑니다.', // 역방향 스크롤 시 표시될 텍스트
 };
 
 /**
