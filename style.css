@@ -838,7 +838,7 @@ body {
   }
 
   .glow-dynamic-text {
-    font-size: 15px;
+    font-size: 11px;
   }
 
   .dummy-content-section .dummy-title {
@@ -967,10 +967,6 @@ body {
     font-size: 16px;
   }
 
-  .glow-dynamic-text {
-    font-size: 16px;
-  }
-
   .dummy-content-section .dummy-title {
     font-size: 32px;
     line-height: 1.1;
@@ -1077,11 +1073,11 @@ body {
   }
 
   .glow-default-text {
-    font-size: 20px;
+    font-size: var(--large-headline-font-size);
   }
 
   .glow-dynamic-text {
-    font-size: 20px;
+    font-size: var(--large-headline-font-size);
   }
 
   .display-text-section {
