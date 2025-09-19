@@ -1,6 +1,4 @@
-/* ===== CSS 변수 정의 - 전체 디자인 시스템의 기준값들 ===== */
 :root {
-  /* Apple Brand Colors - 모바일 최적화 */
   --mx-pro-blue: #2997ff;
   --mx-max-purple: #a972ff;
   --mx-teal: #43b9b9;
@@ -19,7 +17,6 @@
     #ff9004
   );
 
-  /* Apple UI Color System - 일관된 색상 체계 */
   --sk-body-background-color: #000000;
   --sk-body-text-color: #f5f5f7;
   --sk-headline-text-color: #f5f5f7;
@@ -28,7 +25,6 @@
   --sk-glyph-gray-secondary: #86868b;
   --sk-fill-tertiary: #1d1d1f;
 
-  /* 모바일 퍼스트 Pill System - 320px 기준 */
   --apple-pill-background-color: rgba(66, 66, 69, 0.7);
   --apple-pill-inner-glow-color: rgba(232, 232, 237, 0.11);
   --apple-pill-text-color: var(--sk-body-text-color);
@@ -39,35 +35,28 @@
   --apple-pill-min-height: 40px;
   --apple-pill-accent-color: var(--mx-pro-blue);
 
-  /* CSS 변수로 Pill 제어 - 모바일 기본값 */
-  /* 이 값들은 JavaScript에서 동적으로 변경됨 */
   --pill-hint-scale: 0;
   --pill-hint-opacity: 0;
   --pill-width: 40px;
   --pill-text-opacity: 0;
   --pill-text-x: -12px;
 
-  /* 모바일 퍼스트 Typography */
   --base-font-size: 14px;
   --headline-font-size: 20px;
   --large-headline-font-size: 24px;
   --display-font-size: 28px;
 
-  /* 모바일 퍼스트 Spacing System */
   --section-padding: 1.5rem 1rem;
   --content-max-width: 100%;
   --border-radius: 10px;
 }
 
-/* ===== 전역 리셋 - 모든 브라우저에서 일관된 표시 ===== */
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* 패딩과 보더를 width에 포함 */
+  box-sizing: border-box;
 }
 
-/* ===== Apple Intelligence Glow System ===== */
-/* 그라데이션 보더 효과를 구현하는 핵심 컴포넌트 */
 .apple-intelligence-glow {
   --igradient: linear-gradient(
     to bottom right,
@@ -77,85 +66,94 @@
     #ff9004
   );
   position: absolute;
-  z-index: 0; /* 배경 레이어로 설정 */
-  inset: 0; /* top: 0, right: 0, bottom: 0, left: 0과 동일 */
+  z-index: 0;
+  inset: 0;
   border: 0;
-  filter: blur(0.4px); /* 기본 블러 효과 */
+  filter: blur(0.4px);
 }
 
-/* 실제 그라데이션 보더를 생성하는 가상 요소 */
 .apple-intelligence-glow::after {
   --bg-size: calc(100% + 6px);
   content: '';
-  pointer-events: none; /* 마우스 이벤트 차단 */
+  pointer-events: none;
   position: absolute;
   inset: 0;
   background: var(--igradient) 50% / var(--bg-size) var(--bg-size);
   border-radius: var(--border-radius);
   border: 1.5px solid rgba(0, 0, 0, 0);
-  /* CSS mask를 사용해 보더만 보이도록 처리 */
   mask: linear-gradient(hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, 0)),
     linear-gradient(hsl(0, 0%, 100%), hsl(0, 0%, 100%));
   mask-clip: padding-box, border-box;
   mask-composite: intersect;
 }
 
-/* 더 강한 블러 효과를 위한 수정자 클래스 */
-/* .apple-intelligence-glow.apple-intelligence-glow-2 {
-        filter: blur(2px);
-      } */
-
 .apple-intelligence-glow.apple-intelligence-glow-2::after {
   border: 3px solid rgba(0, 0, 0, 0);
 }
 
-/* ===== 스크롤 텍스트 변경 시스템 ===== */
-/* 동적으로 변경되는 텍스트를 표시하는 요소 */
+.glow-default-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  color: rgba(245, 245, 247, 0.8);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  letter-spacing: -0.01em;
+}
+
+.glow-default-text.hidden {
+  opacity: 0;
+}
+
 .glow-dynamic-text {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* 정확한 중앙 정렬 */
-  z-index: 10; /* 다른 요소들보다 위에 표시 */
+  transform: translate(-50%, -50%);
+  z-index: 11;
   color: var(--sk-body-text-color);
   font-size: 14px;
   font-weight: 600;
   text-align: center;
-  white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
-  opacity: 0; /* 기본적으로 숨김 상태 */
+  white-space: nowrap;
+  opacity: 0;
   transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  pointer-events: none; /* 마우스 이벤트 차단 */
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); /* 가독성을 위한 그림자 */
+  pointer-events: none;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
   letter-spacing: -0.01em;
 }
 
-/* 텍스트가 보일 때 적용되는 클래스 */
 .glow-dynamic-text.visible {
   opacity: 1;
 }
 
-/* ===== 모바일 퍼스트 Font System ===== */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* 시스템 폰트 우선 사용 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--sk-body-background-color);
   color: var(--sk-body-text-color);
   font-size: var(--base-font-size);
   line-height: 1.4;
-  overflow-x: hidden; /* 가로 스크롤 방지 */
-  scroll-behavior: smooth; /* 부드러운 스크롤 */
-  -webkit-font-smoothing: antialiased; /* macOS에서 폰트 렌더링 개선 */
-  -moz-osx-font-smoothing: grayscale; /* Firefox에서 폰트 렌더링 개선 */
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 메인 콘텐츠 래퍼 */
 .main-content-wrapper {
   position: relative;
   width: 100%;
 }
 
-/* ===== 모바일 퍼스트 Section Styles ===== */
 .dummy-content-section {
-  min-height: 20vh; /* 뷰포트 높이의 20% */
+  min-height: 20vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -171,7 +169,6 @@ body {
   line-height: 1.15;
   font-weight: 600;
   letter-spacing: -0.01em;
-  /* 그라데이션 텍스트 효과 */
   background: linear-gradient(
     135deg,
     var(--mx-pro-blue) 0%,
@@ -181,18 +178,16 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   max-width: 100%;
-  word-wrap: break-word; /* 긴 단어 자동 줄바꿈 */
+  word-wrap: break-word;
   padding: 0 0.5rem;
 }
 
-/* ===== 메인 애니메이션 섹션 ===== */
 .main-animation-section {
   position: relative;
   background: var(--sk-body-background-color);
   margin-bottom: 130px;
 }
 
-/* 배경 그라데이션 효과를 위한 가상 요소 */
 .main-animation-section::before {
   content: '';
   position: absolute;
@@ -200,7 +195,6 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  /* 미묘한 그라데이션 배경 */
   background: linear-gradient(
       90deg,
       transparent 0%,
@@ -217,8 +211,8 @@ body {
 
 .display-header-section {
   background: var(--sk-body-background-color);
-  backdrop-filter: blur(6px); /* 배경 블러 효과 */
-  -webkit-backdrop-filter: blur(6px); /* Safari 지원 */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -227,7 +221,6 @@ body {
   position: relative;
 }
 
-/* ===== 스크롤 인디케이터 ===== */
 .scroll-indicator-container {
   position: absolute;
   bottom: -60px;
@@ -264,7 +257,6 @@ body {
   white-space: nowrap;
 }
 
-/* 스크롤 인디케이터 바운스 애니메이션 */
 @keyframes scrollIndicatorBounce {
   0%,
   20%,
@@ -281,7 +273,6 @@ body {
   }
 }
 
-/* 호버 시 애니메이션 일시정지 */
 .scroll-indicator-container:hover {
   animation-play-state: paused;
 }
@@ -297,7 +288,6 @@ body {
   opacity: 1;
 }
 
-/* ===== 반응형 미디어 쿼리 ===== */
 @media (min-width: 375px) {
   .scroll-indicator-container {
     bottom: -70px;
@@ -329,7 +319,6 @@ body {
     font-size: 14px;
   }
 
-  /* 더 큰 화면에서는 더 큰 바운스 효과 */
   @keyframes scrollIndicatorBounce {
     0%,
     20%,
@@ -370,13 +359,12 @@ body {
   word-wrap: break-word;
 }
 
-/* ===== 디바이스 이미지 섹션 ===== */
 .device-image-section {
   position: relative;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   overflow: hidden;
-  will-change: height; /* 높이 변경 애니메이션 최적화 */
+  will-change: height;
 }
 
 .device-image-container {
@@ -388,20 +376,13 @@ body {
   justify-content: center;
 }
 
-/* ===== 스케일 가능한 디바이스 목업 ===== */
-/* 핵심 수정: 절대 위치 기반 완벽 중앙정렬 */
 .scalable-device-mockup {
-  /* 절대 위치 + 중앙 변환으로 확실한 중앙정렬 */
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-
-  /* 더 작은 모바일 크기 */
   width: 60vw;
   height: 40vh;
-
-  /* 기본 스타일 */
   background: rgba(22, 22, 23, 0.8);
   border-radius: var(--border-radius);
   display: flex;
@@ -412,34 +393,13 @@ body {
   color: white;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   flex-direction: column;
-  will-change: transform; /* transform 애니메이션 최적화 */
+  will-change: transform;
   overflow: hidden;
   padding: 0.8rem;
   text-align: center;
   z-index: 1;
 }
 
-/* 가상 요소로 텍스트 콘텐츠 표시 */
-/* .scalable-device-mockup::before {
-        content: 'Lorem Ipsum is simply dummy text';
-        font-size: 1rem;
-        margin-bottom: 0.4rem;
-        position: relative;
-        z-index: 2;
-        word-wrap: break-word;
-      }
-
-      .scalable-device-mockup::after {
-        content: 'of the printing and typesetting industry.';
-        font-size: 0.7rem;
-        opacity: 0.9;
-        text-align: center;
-        position: relative;
-        z-index: 2;
-        word-wrap: break-word;
-      } */
-
-/* ===== 디스플레이 텍스트 섹션 ===== */
 .display-text-section {
   display: flex;
   flex-direction: column;
@@ -473,7 +433,6 @@ body {
   font-size: var(--large-headline-font-size);
 }
 
-/* ===== Tech 섹션들 ===== */
 .dummy-tech-section {
   display: flex;
   justify-content: center;
@@ -516,7 +475,6 @@ body {
   max-width: 95%;
 }
 
-/* 기술 통계 표시 영역 */
 .tech-stats {
   display: flex;
   justify-content: center;
@@ -536,7 +494,6 @@ body {
   transition: all 0.3s ease;
 }
 
-/* 호버 효과 */
 .tech-stat-item:hover {
   background: rgba(41, 151, 255, 0.12);
   border-color: rgba(41, 151, 255, 0.3);
@@ -565,7 +522,6 @@ body {
   font-weight: 600;
 }
 
-/* ===== 기능 쇼케이스 섹션 ===== */
 .function-showcase-section {
   display: flex;
   flex-direction: column;
@@ -598,7 +554,6 @@ body {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
 }
 
-/* 기능 이미지 플레이스홀더 */
 .function-image-placeholder-mockup {
   width: 1200px;
   height: 160px;
@@ -647,7 +602,6 @@ body {
   min-height: 250px;
 }
 
-/* 기능 리스트 */
 .function-feature-list {
   list-style: none;
   display: flex;
@@ -662,7 +616,6 @@ body {
   padding-top: 0.8rem;
 }
 
-/* 그라데이션 구분선 */
 .function-feature-list-item:before {
   display: block;
   content: '';
@@ -696,7 +649,6 @@ body {
   font-size: 14px;
 }
 
-/* ===== Pill Animation DOM Section ===== */
 .pill-animation-dom-section {
   min-height: 50vh;
   display: flex;
@@ -710,8 +662,6 @@ body {
   position: relative;
 }
 
-/* ===== 고정된 Pill 컨테이너 ===== */
-/* 핵심: absolute container + sticky pill - 모바일 최적화 */
 .fixed-pill-container {
   position: absolute;
   top: 0;
@@ -721,15 +671,14 @@ body {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  pointer-events: none; /* 기본적으로 클릭 이벤트 차단 */
+  pointer-events: none;
   z-index: 100;
 }
 
-/* 애니메이션되는 Pill 래퍼 */
 .animated-pill-wrapper {
   position: sticky;
   bottom: var(--apple-pill-margin);
-  width: var(--pill-width); /* CSS 변수로 제어 */
+  width: var(--pill-width);
   height: var(--apple-pill-min-height);
   background: var(--apple-pill-background-color);
   backdrop-filter: blur(var(--apple-pill-blur-radius));
@@ -740,7 +689,7 @@ body {
   display: flex;
   align-items: center;
   overflow: hidden;
-  will-change: width, transform; /* 애니메이션 최적화 */
+  will-change: width, transform;
   transform-origin: center center;
   opacity: 0.95;
   transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -748,7 +697,6 @@ body {
   --pill-hint-opacity: 0;
 }
 
-/* Pill 주변 힌트 효과 */
 .animated-pill-wrapper::before {
   content: '';
   position: absolute;
@@ -772,19 +720,16 @@ body {
   z-index: -1;
 }
 
-/* 상호작용 가능한 상태 */
 .animated-pill-wrapper.interactive-state {
   pointer-events: auto;
 }
 
-/* 확장된 상태 */
 .animated-pill-wrapper.expanded {
   --pill-width: 180px;
   --pill-text-opacity: 1;
   --pill-text-x: 0px;
 }
 
-/* Pill 내부 인터랙티브 버튼 */
 .pill-interactive-button {
   width: 32px;
   height: 32px;
@@ -802,8 +747,8 @@ body {
   cursor: pointer;
   padding: 0;
   transition: transform 0.2s ease;
-  -webkit-tap-highlight-color: transparent; /* 모바일 탭 하이라이트 제거 */
-  touch-action: manipulation; /* 터치 최적화 */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .pill-interactive-button:hover {
@@ -814,7 +759,6 @@ body {
   transform: translateY(-50%) scale(0.95);
 }
 
-/* 버튼 아이콘 */
 .pill-button-icon {
   width: 32px;
   height: 32px;
@@ -835,7 +779,6 @@ body {
   transition: all 0.3s ease;
 }
 
-/* Pill 내부 텍스트 */
 .pill-display-text {
   font-size: var(--apple-pill-font-size);
   font-weight: var(--apple-pill-font-weight);
@@ -855,7 +798,6 @@ body {
   text-overflow: ellipsis;
 }
 
-/* 고정된 가이드 링크 */
 .fixed-guide-link {
   position: fixed;
   bottom: 20px;
@@ -881,10 +823,6 @@ body {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
 
-/* ===== 반응형 미디어 쿼리들 ===== */
-/* 모바일 퍼스트 접근법에 따른 단계별 반응형 설계 */
-
-/* ===== 1) ≥360px (Galaxy S 등 360 폭 계열) ===== */
 @media (min-width: 360px) {
   :root {
     --apple-pill-font-size: 13px;
@@ -893,6 +831,10 @@ body {
     --base-font-size: 15px;
     --headline-font-size: 21px;
     --apple-pill-min-height: 42px;
+  }
+
+  .glow-default-text {
+    font-size: 15px;
   }
 
   .glow-dynamic-text {
@@ -1012,7 +954,6 @@ body {
   }
 }
 
-/* ===== 2) ≥375px (iPhone 375 폭 계열) ===== */
 @media (min-width: 375px) {
   :root {
     --large-headline-font-size: 26px;
@@ -1020,6 +961,10 @@ body {
     --apple-pill-margin: 14px;
     --section-padding: 2rem 1.25rem;
     --base-font-size: 16px;
+  }
+
+  .glow-default-text {
+    font-size: 16px;
   }
 
   .glow-dynamic-text {
@@ -1119,10 +1064,6 @@ body {
   }
 }
 
-/* ===== 더 많은 미디어 쿼리들... (간소화를 위해 일부 생략) ===== */
-/* 실제로는 더 많은 브레이크포인트들이 있습니다 */
-
-/* ===== 9) ≥768px (태블릿 이상) ===== */
 @media (min-width: 768px) {
   :root {
     --large-headline-font-size: 48px;
@@ -1135,8 +1076,12 @@ body {
     --pill-width: 56px;
   }
 
+  .glow-default-text {
+    font-size: 20px;
+  }
+
   .glow-dynamic-text {
-    font-size: var(--large-headline-font-size);
+    font-size: 20px;
   }
 
   .display-text-section {
@@ -1151,7 +1096,6 @@ body {
     height: 100vh;
   }
 
-  /* 태블릿/데스크탑에서는 기존 방식 유지 */
   .scalable-device-mockup {
     position: relative;
     left: auto;
@@ -1272,7 +1216,6 @@ body {
   }
 }
 
-/* ===== 10) ≥1200px (데스크탑) ===== */
 @media (min-width: 1200px) {
   .scalable-device-mockup {
     width: 100vw;

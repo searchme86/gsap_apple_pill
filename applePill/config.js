@@ -1,4 +1,5 @@
-// animation_applePill.html/scripts/config.js - DOM 요소 및 애니메이션 설정값 관리
+// animation_applePill.html/scripts/config.js
+// DOM 요소 및 애니메이션 설정값 관리 + 기본 텍스트 시스템 통합
 
 /**
  * DOM 요소들을 중앙에서 관리하는 설정 객체
@@ -21,6 +22,16 @@ export const domElementsConfig = {
 
   // 텍스트 표시 섹션 - 스크롤에 따라 나타나는 구간
   displayTextSection: document.getElementById('displayTextSection'),
+
+  // ===== 텍스트 시스템 관련 요소들 =====
+
+  // 기본 텍스트 요소 - DOM 로드 시 처음에 표시되는 정적 텍스트
+  // "scale 애니메이션 영역입니다"와 같은 기본 안내 텍스트
+  glowDefaultText: document.getElementById('glowDefaultText'),
+
+  // 동적 텍스트 요소 - 스크롤 방향에 따라 변경되는 텍스트
+  // 정방향/역방향 스크롤에 따른 동적 메시지 표시
+  glowDynamicText: document.getElementById('glowDynamicText'),
 };
 
 /**
@@ -72,4 +83,27 @@ export const animationStateTracker = {
 
   // Transform 속성이 제거되었는지 여부 (CSS transition 활성화용)
   isTransformPropertyRemoved: false,
+};
+
+/**
+ * 텍스트 시스템 관련 상수 정의
+ * 기본 텍스트와 동적 텍스트 시스템에서 사용하는 설정값들
+ */
+export const textSystemConfiguration = {
+  // 기본 텍스트에서 동적 텍스트로 전환하는 스크롤 진행률 임계값
+  // 0.05 = 5% 진행 시점에서 전환
+  modeTransitionThreshold: 0.05,
+
+  // 동적 텍스트 표시 구간 설정
+  dynamicTextStartThreshold: 0.1, // 10% 진행률부터 동적 텍스트 표시
+  dynamicTextEndThreshold: 0.9, // 90% 진행률까지 동적 텍스트 표시
+
+  // 애니메이션 지속시간 설정
+  defaultTextFadeOutDuration: 0.25, // 기본 텍스트 페이드아웃 시간 (초)
+  defaultTextFadeInDuration: 0.3, // 기본 텍스트 페이드인 시간 (초)
+  dynamicTextFadeOutDuration: 0.2, // 동적 텍스트 페이드아웃 시간 (초)
+  dynamicTextFadeInDuration: 0.3, // 동적 텍스트 페이드인 시간 (초)
+
+  // 이징 함수 설정
+  textTransitionEasing: 'power2.out', // 모든 텍스트 전환에 사용할 이징
 };

@@ -1,10 +1,30 @@
-// animation_applePill.html/scripts/pillAnimations.js - Pill 애니메이션 타임라인 및 컨트롤러
+// animation_applePill.html/scripts/pillAnimations.js - Pill 애니메이션 타임라인 및 컨트롤러 + 텍스트 시스템 연동
 
 import {
   domElementsConfig,
   pillAnimationConfiguration,
   animationStateTracker,
 } from './config.js';
+
+/**
+ * 텍스트 시스템에 즉시 기본 텍스트 모드로 전환을 요청하는 함수
+ * Pill 상태 변경 시 즉각적인 텍스트 반응을 위해 사용
+ */
+const requestDefaultTextModeSwitch = async () => {
+  try {
+    // 동적 import를 사용하여 textChangeSystem 모듈 로드
+    const textSystemModule = await import('./textChangeSystem.js');
+
+    // 기본 텍스트 모드로 즉시 전환 요청
+    await textSystemModule.forceDefaultTextMode();
+
+    console.log(
+      '[DEBUG] Forced switch to default text mode triggered by Pill state'
+    );
+  } catch (importError) {
+    console.warn('[WARN] Failed to trigger text mode switch:', importError);
+  }
+};
 
 /**
  * Pill 상승 애니메이션 타임라인을 생성하는 함수
@@ -114,6 +134,9 @@ export const createPillDisappearAnimationTimeline = () => {
       animationStateTracker.isCurrentlyAnimating = true;
       animationStateTracker.isReverseDirection = true;
       animationStateTracker.currentAnimationPhase = 'disappearing';
+
+      // 🎯 핵심: Pill이 사라지기 시작할 때 즉시 기본 텍스트로 전환
+      requestDefaultTextModeSwitch();
     },
 
     /**
@@ -128,6 +151,9 @@ export const createPillDisappearAnimationTimeline = () => {
       // Pill 요소 숨김 및 클래스 정리
       domElementsConfig.animatedPillWrapper.style.display = 'none';
       domElementsConfig.animatedPillWrapper.classList.remove('expanded');
+
+      // 🎯 추가 안전장치: 완료 시에도 기본 텍스트 모드 확실히 설정
+      requestDefaultTextModeSwitch();
     },
   });
 
@@ -244,6 +270,9 @@ export const initializePillAnimationController = () => {
         domElementsConfig.animatedPillWrapper.classList.remove('expanded');
         animationStateTracker.currentAnimationPhase = 'hidden';
         animationStateTracker.isCurrentlyAnimating = false;
+
+        // 🎯 핵심: 즉시 숨김 처리 시에도 기본 텍스트로 전환
+        requestDefaultTextModeSwitch();
       }
     },
   });
