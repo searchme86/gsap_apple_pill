@@ -30,6 +30,9 @@ export const textChangeStateTracker = {
   // 동시 실행 방지를 위한 직관적인 상태 관리
   isTextChangingGoingOn: false, // 현재 텍스트 변경이 진행 중인지 여부
   lastOperationTimestamp: 0, // 마지막 텍스트 작업 시간
+
+  // 🎯 추가: 강제 모드 플래그
+  forceDefaultModeActive: false, // 강제 기본 텍스트 모드가 활성화되어 있는지 여부
 };
 
 /**
@@ -59,27 +62,35 @@ const getGlowDefaultTextElement = () => {
  * 동시 실행 방지를 위한 시스템
  *
  * @param {string} operationName - 실행하려는 작업명 (디버깅용)
+ * @param {boolean} isForceOperation - 강제 실행 여부 (기본값: false)
  * @returns {boolean} 텍스트 변경 시작 성공 여부
  */
-const startTextChange = (operationName) => {
+const startTextChange = (operationName, isForceOperation = false) => {
   const currentTimestamp = Date.now();
 
-  // 이미 다른 텍스트 변경이 진행 중이고, 100ms 이내에 다른 작업이 실행되었으면 거부
-  if (
-    textChangeStateTracker.isTextChangingGoingOn &&
-    currentTimestamp - textChangeStateTracker.lastOperationTimestamp < 100
-  ) {
-    console.warn(
-      `[WARN] Text operation '${operationName}' blocked - another text is changing`
-    );
-    return false;
+  // 강제 작업이 아닌 경우에만 동시 실행 방지 검사
+  if (!isForceOperation) {
+    // 이미 다른 텍스트 변경이 진행 중이고, 100ms 이내에 다른 작업이 실행되었으면 거부
+    if (
+      textChangeStateTracker.isTextChangingGoingOn &&
+      currentTimestamp - textChangeStateTracker.lastOperationTimestamp < 100
+    ) {
+      console.warn(
+        `[WARN] Text operation '${operationName}' blocked - another text is changing`
+      );
+      return false;
+    }
   }
 
   // 텍스트 변경 시작
   textChangeStateTracker.isTextChangingGoingOn = true;
   textChangeStateTracker.lastOperationTimestamp = currentTimestamp;
 
-  console.log(`[DEBUG] Text change started for: ${operationName}`);
+  console.log(
+    `[DEBUG] Text change started for: ${operationName}${
+      isForceOperation ? ' (FORCE)' : ''
+    }`
+  );
   return true;
 };
 
@@ -305,12 +316,13 @@ const executeTextFadeIn = (targetElement, newTextContent) => {
  * 기본 텍스트에서 동적 텍스트로, 또는 그 반대로 전환
  *
  * @param {string} targetMode - 전환할 모드 ('default' | 'dynamic')
+ * @param {boolean} isForceMode - 강제 모드 여부 (기본값: false)
  */
-const switchTextMode = async (targetMode) => {
+const switchTextMode = async (targetMode, isForceMode = false) => {
   const operationName = `switchTextMode-${targetMode}`;
 
   // 텍스트 변경 시작 시도
-  if (!startTextChange(operationName)) {
+  if (!startTextChange(operationName, isForceMode)) {
     console.warn(`[WARN] ${operationName} aborted - another text is changing`);
     return;
   }
@@ -319,16 +331,19 @@ const switchTextMode = async (targetMode) => {
     // DOM 상태 동기화
     synchronizeTextStatesWithDOM();
 
-    // 이미 전환이 진행 중이면 중복 실행 방지
-    if (textChangeStateTracker.defaultTextTransitionInProgress) {
+    // 강제 모드가 아닌 경우 이미 전환이 진행 중이면 중복 실행 방지
+    if (
+      !isForceMode &&
+      textChangeStateTracker.defaultTextTransitionInProgress
+    ) {
       console.warn(
         `[WARN] ${operationName} aborted - transition already in progress`
       );
       return;
     }
 
-    // 현재 모드와 같으면 전환할 필요 없음
-    if (textChangeStateTracker.currentTextMode === targetMode) {
+    // 현재 모드와 같으면 전환할 필요 없음 (강제 모드 제외)
+    if (!isForceMode && textChangeStateTracker.currentTextMode === targetMode) {
       console.log(
         `[DEBUG] ${operationName} skipped - already in ${targetMode} mode`
       );
@@ -347,6 +362,14 @@ const switchTextMode = async (targetMode) => {
     textChangeStateTracker.defaultTextTransitionInProgress = true;
 
     if (targetMode === 'dynamic') {
+      // 🎯 강제 기본 텍스트 모드가 활성화되어 있으면 동적 텍스트로 전환하지 않음
+      if (textChangeStateTracker.forceDefaultModeActive) {
+        console.log(
+          '[DEBUG] Dynamic text mode blocked - force default mode is active'
+        );
+        return;
+      }
+
       // 기본 텍스트 → 동적 텍스트 모드로 전환
       console.log('[DEBUG] Switching to dynamic text mode');
 
@@ -360,7 +383,9 @@ const switchTextMode = async (targetMode) => {
     } else if (targetMode === 'default') {
       // 동적 텍스트 → 기본 텍스트 모드로 전환
       console.log(
-        '[DEBUG] Switching to default text mode (triggered by text change system)'
+        `[DEBUG] Switching to default text mode (triggered by text change system)${
+          isForceMode ? ' - FORCE MODE' : ''
+        }`
       );
 
       // 동적 텍스트가 보이고 있으면 먼저 숨김
@@ -380,6 +405,24 @@ const switchTextMode = async (targetMode) => {
       // 동적 텍스트 상태 초기화
       textChangeStateTracker.currentDisplayedText = '';
       textChangeStateTracker.previousScrollDirection = null;
+
+      // 🎯 강제 모드인 경우 강제 기본 텍스트 모드 플래그 설정
+      if (isForceMode) {
+        textChangeStateTracker.forceDefaultModeActive = true;
+        console.log('[DEBUG] Force default mode activated');
+
+        // 🎯 수정: 2초 후 강제 모드 해제 (기존 5초에서 단축)
+        // 사용자가 빠르게 다시 스크롤할 수 있도록 시간 단축
+        setTimeout(() => {
+          // 한번 더 확인: 아직 강제 모드가 활성화되어 있고, 외부에서 해제되지 않았다면
+          if (textChangeStateTracker.forceDefaultModeActive) {
+            textChangeStateTracker.forceDefaultModeActive = false;
+            console.log(
+              '[DEBUG] Force default mode auto-deactivated after 2 seconds'
+            );
+          }
+        }, 2000);
+      }
     }
 
     // 최종 DOM 상태 재동기화
@@ -396,8 +439,50 @@ const switchTextMode = async (targetMode) => {
 };
 
 /**
+ * 🎯 새로 추가: 강제 기본 텍스트 모드를 즉시 해제하는 함수
+ * Pill이 다시 뷰포트에 진입할 때 호출되어 동적 텍스트 시스템을 재활성화
+ */
+export const deactivateForceDefaultMode = () => {
+  if (textChangeStateTracker.forceDefaultModeActive) {
+    textChangeStateTracker.forceDefaultModeActive = false;
+    console.log('[DEBUG] Force default mode DEACTIVATED by Pill re-entry');
+  } else {
+    console.log('[DEBUG] Force default mode was already inactive');
+  }
+};
+
+/**
+ * 🎯 새로 추가: 강제로 기본 텍스트 모드로 전환하는 함수
+ * Pill이 뷰포트 아래로 사라질 때 즉시 호출됨
+ * 동시 실행 방지 시스템을 우회하여 확실한 텍스트 전환 보장
+ *
+ * @returns {Promise} 전환 완료 시 resolve되는 Promise
+ */
+export const forceDefaultTextMode = async () => {
+  const operationName = 'forceDefaultTextMode';
+
+  console.log('[DEBUG] FORCE default text mode requested by Pill animation');
+
+  // 강제 모드로 텍스트 변경 시작 (동시 실행 방지 우회)
+  if (!startTextChange(operationName, true)) {
+    console.warn(`[WARN] ${operationName} failed to start even in force mode`);
+    return;
+  }
+
+  try {
+    // 강제 모드로 기본 텍스트 모드로 즉시 전환
+    await switchTextMode('default', true);
+  } catch (forceError) {
+    console.error('[ERROR] Force default text mode failed:', forceError);
+  } finally {
+    // 텍스트 변경 완료
+    finishTextChange(operationName);
+  }
+};
+
+/**
  * 외부에서 기본 텍스트 모드로 전환하는 함수 (동시 실행 방지 시스템 적용)
- * pillAnimations.js에서 Pill 상태 변경 시 즉시 호출됨
+ * pillAnimations.js에서 Pill 상태 변경 시 호출됨 (일반 모드)
  *
  * @returns {Promise} 전환 완료 시 resolve되는 Promise
  */
@@ -413,7 +498,7 @@ export const defaultTextMode = async () => {
   }
 
   try {
-    // 기본 텍스트 모드로 즉시 전환
+    // 기본 텍스트 모드로 전환
     await switchTextMode('default');
   } catch (defaultError) {
     console.error('[ERROR] Default text mode failed:', defaultError);
@@ -435,6 +520,14 @@ export const updateScrollDirectionText = async (
   previousProgressValue = 0
 ) => {
   const operationName = 'updateScrollDirectionText';
+
+  // 🎯 1순위: 강제 기본 텍스트 모드가 활성화되어 있으면 모든 스크롤 기반 텍스트 업데이트 차단
+  if (textChangeStateTracker.forceDefaultModeActive) {
+    console.log(
+      '[DEBUG] Scroll text update blocked - force default mode is active'
+    );
+    return;
+  }
 
   // 다른 텍스트 변경이 진행 중인지 빠른 확인 (50ms 이내 작업만 허용)
   const currentTimestamp = Date.now();
@@ -460,7 +553,7 @@ export const updateScrollDirectionText = async (
     return;
   }
 
-  // ===== 1순위: Pill 상태 기반 기본 텍스트 모드 전환 =====
+  // ===== 2순위: Pill 상태 기반 기본 텍스트 모드 전환 =====
   // Pill이 사라지거나 숨겨져 있으면 기본 텍스트 모드로 전환
   const shouldShowDefaultByPillState = shouldShowDefaultTextBasedOnPillState();
 
@@ -470,11 +563,7 @@ export const updateScrollDirectionText = async (
     return;
   }
 
-  // ===== 스크롤 진행률 기반 조건 제거 =====
-  // 기존 scrollProgressValue < 0.05 조건을 제거하여
-  // 오직 Pill 애니메이션 상태에만 의존하도록 변경
-
-  // ===== 2순위: 동적 텍스트 모드로 전환 =====
+  // ===== 3순위: 동적 텍스트 모드로 전환 =====
   // 스크롤이 시작되었고 Pill이 활성 상태이면 동적 텍스트 모드로 전환
   if (textChangeStateTracker.currentTextMode === 'default') {
     await switchTextMode('dynamic');
@@ -591,8 +680,11 @@ export const initializeScrollTextSystem = () => {
   textChangeStateTracker.currentTextMode = 'default';
   textChangeStateTracker.defaultTextTransitionInProgress = false;
 
+  // 🎯 강제 모드 플래그 초기화
+  textChangeStateTracker.forceDefaultModeActive = false;
+
   console.log(
-    '[DEBUG] Scroll text system with Pill state integration initialized successfully'
+    '[DEBUG] Scroll text system with Pill state integration and force mode initialized successfully'
   );
   return true;
 };

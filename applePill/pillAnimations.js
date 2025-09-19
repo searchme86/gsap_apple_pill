@@ -7,20 +7,25 @@ import {
 } from './config.js';
 
 // 정적 import로 텍스트 시스템 함수 가져오기
-import { defaultTextMode } from './textChangeSystem.js';
+import { forceDefaultTextMode } from './textChangeSystem.js';
 
 /**
- * 텍스트 시스템에 즉시 기본 텍스트 모드로 전환을 요청하는 함수
- * Pill 상태 변경 시 즉각적인 텍스트 반응을 위해 사용
+ * 텍스트 시스템에 강제로 기본 텍스트 모드로 전환을 요청하는 함수
+ * Pill이 뷰포트 아래로 사라질 때 즉각적인 텍스트 반응을 위해 사용
  */
-const requestDefaultTextModeSwitch = async () => {
+const requestForceDefaultTextModeSwitch = async () => {
   try {
-    // 직접 함수 호출
-    await defaultTextMode();
+    // 강제 기본 텍스트 모드 함수 호출
+    await forceDefaultTextMode();
 
-    console.log('[DEBUG] Switch to default text mode triggered by Pill state');
+    console.log(
+      '[DEBUG] Force switch to default text mode triggered by Pill disappearance'
+    );
   } catch (textModeError) {
-    console.warn('[WARN] Failed to trigger text mode switch:', textModeError);
+    console.warn(
+      '[WARN] Failed to force trigger text mode switch:',
+      textModeError
+    );
   }
 };
 
@@ -133,8 +138,8 @@ export const createPillDisappearAnimationTimeline = () => {
       animationStateTracker.isReverseDirection = true;
       animationStateTracker.currentAnimationPhase = 'disappearing';
 
-      // 🎯 핵심: Pill이 사라지기 시작할 때 즉시 기본 텍스트로 전환
-      requestDefaultTextModeSwitch();
+      // 🎯 핵심: Pill이 사라지기 시작할 때 즉시 강제로 기본 텍스트로 전환
+      requestForceDefaultTextModeSwitch();
     },
 
     /**
@@ -150,8 +155,8 @@ export const createPillDisappearAnimationTimeline = () => {
       domElementsConfig.animatedPillWrapper.style.display = 'none';
       domElementsConfig.animatedPillWrapper.classList.remove('expanded');
 
-      // 🎯 추가 안전장치: 완료 시에도 기본 텍스트 모드 확실히 설정
-      requestDefaultTextModeSwitch();
+      // 🎯 추가 안전장치: 완료 시에도 강제로 기본 텍스트 모드 확실히 설정
+      requestForceDefaultTextModeSwitch();
     },
   });
 
@@ -217,6 +222,8 @@ export const initializePillAnimationController = () => {
      * 메인 애니메이션 섹션 진입 시 콜백
      */
     onEnter: () => {
+      console.log('[DEBUG] Pill entering viewport - starting rise animation');
+
       // 기존 애니메이션이 진행 중이면 중단
       if (animationStateTracker.isCurrentlyAnimating) {
         pillDisappearTimeline.kill();
@@ -238,10 +245,71 @@ export const initializePillAnimationController = () => {
     },
 
     /**
-     * 메인 애니메이션 섹션 이탈 시 콜백 (역방향 스크롤)
+     * 🎯 새로 추가: 메인 애니메이션 섹션 재진입 시 콜백 (정방향 스크롤로 다시 들어올 때)
+     * 강제 기본 텍스트 모드를 해제하고 정상적인 동적 텍스트 시스템 재활성화
+     */
+    onEnterBack: () => {
+      console.log(
+        '[DEBUG] Pill re-entering viewport - reactivating dynamic text system'
+      );
+
+      // 🎯 핵심: 강제 기본 텍스트 모드 즉시 해제
+      // textChangeSystem.js의 forceDefaultModeActive 플래그를 해제하여
+      // 스크롤 기반 텍스트 업데이트를 다시 활성화
+      import('./textChangeSystem.js')
+        .then(({ deactivateForceDefaultMode }) => {
+          if (deactivateForceDefaultMode) {
+            deactivateForceDefaultMode();
+          }
+        })
+        .catch((error) => {
+          console.warn(
+            '[WARN] Failed to deactivate force default mode:',
+            error
+          );
+        });
+
+      // 기존 사라짐 애니메이션이 진행 중이면 중단
+      if (
+        animationStateTracker.isCurrentlyAnimating &&
+        animationStateTracker.isReverseDirection
+      ) {
+        pillDisappearTimeline.kill();
+        console.log('[DEBUG] Disappear animation killed for re-entry');
+      }
+
+      // Pill이 완전히 숨겨진 상태라면 다시 상승 애니메이션 시작
+      if (animationStateTracker.currentAnimationPhase === 'hidden') {
+        console.log('[DEBUG] Restarting rise animation for hidden Pill');
+
+        // Pill 초기 상태 재설정
+        gsap.set(domElementsConfig.animatedPillWrapper, {
+          y: pillAnimationConfiguration.pillInitialYPosition, // 800px
+          opacity: 0.9,
+          display: 'flex',
+        });
+
+        // 클래스 정리
+        domElementsConfig.animatedPillWrapper.classList.remove('expanded');
+        animationStateTracker.isTransformPropertyRemoved = false;
+
+        // 상승 애니메이션 재시작
+        pillRiseTimeline.restart();
+      } else {
+        console.log(
+          `[DEBUG] Pill in ${animationStateTracker.currentAnimationPhase} state - continuing current animation`
+        );
+      }
+    },
+
+    /**
+     * 🎯 핵심 수정: 메인 애니메이션 섹션 이탈 시 콜백 (역방향 스크롤)
+     * Pill이 뷰포트 아래로 사라질 때 강제로 기본 텍스트로 전환
      */
     onLeaveBack: () => {
-      // 상승 애니메이션 중단하고 사라짐으로 전환
+      console.log('[DEBUG] Pill leaving viewport - forcing default text mode');
+
+      // 상승 애니메이션 즉시 중단
       if (
         animationStateTracker.isCurrentlyAnimating &&
         !animationStateTracker.isReverseDirection
@@ -255,11 +323,17 @@ export const initializePillAnimationController = () => {
         'y'
       );
 
+      console.log(`[DEBUG] Current Pill Y position: ${currentYPosition}`);
+
       // Y 위치가 -100px 이상 올라와 있으면 사라짐 애니메이션 실행
       const shouldPlayDisappearAnimation = currentYPosition <= -100;
+
       if (shouldPlayDisappearAnimation) {
+        console.log('[DEBUG] Playing disappear animation');
         pillDisappearTimeline.restart();
       } else {
+        console.log('[DEBUG] Instantly hiding Pill');
+
         // 아직 충분히 올라오지 않았으면 즉시 숨김
         gsap.set(domElementsConfig.animatedPillWrapper, {
           y: pillAnimationConfiguration.pillInitialYPosition,
@@ -269,9 +343,15 @@ export const initializePillAnimationController = () => {
         animationStateTracker.currentAnimationPhase = 'hidden';
         animationStateTracker.isCurrentlyAnimating = false;
 
-        // 🎯 핵심: 즉시 숨김 처리 시에도 기본 텍스트로 전환
-        requestDefaultTextModeSwitch();
+        // 🎯 핵심: 즉시 숨김 처리 시에도 강제로 기본 텍스트로 전환
+        requestForceDefaultTextModeSwitch();
       }
+
+      // 🎯 추가: Pill이 뷰포트를 벗어날 때 항상 강제로 기본 텍스트 모드 설정
+      // 위의 조건과 관계없이 무조건 실행하여 확실한 텍스트 전환 보장
+      setTimeout(() => {
+        requestForceDefaultTextModeSwitch();
+      }, 100);
     },
   });
 };
