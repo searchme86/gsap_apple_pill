@@ -8,8 +8,8 @@ import { domElementsConfig, animationStateTracker } from './config.js';
  * 정방향과 역방향 스크롤에 따라 표시될 텍스트를 정의
  */
 export const scrollTextMapping = {
-  forward: 'scale 속성으로 크기가 줄어들고 텍스트가 올라옵니다.', // 정방향 스크롤 시 표시될 텍스트
-  backward: '박스 원래 사이즈로 돌아오고 텍스트가 내려갑니다.', // 역방향 스크롤 시 표시될 텍스트
+  forward: 'css의 scale 속성으로 크기가 줄어듭니다', // 정방향 스크롤 시 표시될 텍스트
+  backward: '원래 크기의 속성으로 돌아갑니다', // 역방향 스크롤 시 표시될 텍스트
 };
 
 /**
@@ -26,6 +26,10 @@ export const textChangeStateTracker = {
   isDefaultTextVisible: true, // 기본 텍스트가 현재 보이는 상태인지 여부 (초기값: true)
   currentTextMode: 'default', // 현재 텍스트 모드 ('default' | 'dynamic')
   defaultTextTransitionInProgress: false, // 기본 텍스트 전환이 진행 중인지 여부
+
+  // 동시 실행 방지를 위한 직관적인 상태 관리
+  isTextChangingGoingOn: false, // 현재 텍스트 변경이 진행 중인지 여부
+  lastOperationTimestamp: 0, // 마지막 텍스트 작업 시간
 };
 
 /**
@@ -48,6 +52,89 @@ const getGlowTextElement = () => {
 const getGlowDefaultTextElement = () => {
   const { scalableDeviceMockup } = domElementsConfig;
   return scalableDeviceMockup?.querySelector('#glowDefaultText') || null;
+};
+
+/**
+ * 텍스트 변경 시작 함수 - 다른 텍스트 작업을 차단
+ * 동시 실행 방지를 위한 시스템
+ *
+ * @param {string} operationName - 실행하려는 작업명 (디버깅용)
+ * @returns {boolean} 텍스트 변경 시작 성공 여부
+ */
+const startTextChange = (operationName) => {
+  const currentTimestamp = Date.now();
+
+  // 이미 다른 텍스트 변경이 진행 중이고, 100ms 이내에 다른 작업이 실행되었으면 거부
+  if (
+    textChangeStateTracker.isTextChangingGoingOn &&
+    currentTimestamp - textChangeStateTracker.lastOperationTimestamp < 100
+  ) {
+    console.warn(
+      `[WARN] Text operation '${operationName}' blocked - another text is changing`
+    );
+    return false;
+  }
+
+  // 텍스트 변경 시작
+  textChangeStateTracker.isTextChangingGoingOn = true;
+  textChangeStateTracker.lastOperationTimestamp = currentTimestamp;
+
+  console.log(`[DEBUG] Text change started for: ${operationName}`);
+  return true;
+};
+
+/**
+ * 텍스트 변경 완료 함수 - 다른 텍스트 작업 허용
+ *
+ * @param {string} operationName - 완료된 작업명 (디버깅용)
+ */
+const finishTextChange = (operationName) => {
+  textChangeStateTracker.isTextChangingGoingOn = false;
+  console.log(`[DEBUG] Text change finished for: ${operationName}`);
+};
+
+/**
+ * DOM 상태와 추적기 상태를 동기화하는 함수
+ * 실제 DOM 요소의 상태를 확인하여 추적기 상태를 보정
+ */
+const synchronizeTextStatesWithDOM = () => {
+  const defaultTextElement = getGlowDefaultTextElement();
+  const dynamicTextElement = getGlowTextElement();
+
+  if (!defaultTextElement || !dynamicTextElement) {
+    return;
+  }
+
+  // 실제 DOM 상태 읽기
+  const defaultTextOpacity =
+    parseFloat(window.getComputedStyle(defaultTextElement).opacity) || 0;
+  const dynamicTextOpacity =
+    parseFloat(window.getComputedStyle(dynamicTextElement).opacity) || 0;
+
+  // 추적기 상태를 DOM 상태와 동기화
+  const isDefaultActuallyVisible = defaultTextOpacity > 0.5;
+  const isDynamicActuallyVisible = dynamicTextOpacity > 0.5;
+
+  // 상태 보정
+  textChangeStateTracker.isDefaultTextVisible = isDefaultActuallyVisible;
+  textChangeStateTracker.isTextVisible = isDynamicActuallyVisible;
+
+  // 현재 모드 결정 (둘 다 보이거나 둘 다 안 보이는 경우 기본 모드로)
+  if (isDefaultActuallyVisible && !isDynamicActuallyVisible) {
+    textChangeStateTracker.currentTextMode = 'default';
+  } else if (!isDefaultActuallyVisible && isDynamicActuallyVisible) {
+    textChangeStateTracker.currentTextMode = 'dynamic';
+  } else {
+    // 둘 다 보이거나 둘 다 안 보이는 비정상 상태
+    textChangeStateTracker.currentTextMode = 'default';
+    console.warn(
+      `[WARN] Abnormal text state detected - default: ${defaultTextOpacity}, dynamic: ${dynamicTextOpacity}`
+    );
+  }
+
+  console.log(
+    `[DEBUG] Text states synchronized - default: ${isDefaultActuallyVisible}, dynamic: ${isDynamicActuallyVisible}, mode: ${textChangeStateTracker.currentTextMode}`
+  );
 };
 
 /**
@@ -214,34 +301,51 @@ const executeTextFadeIn = (targetElement, newTextContent) => {
 };
 
 /**
- * 텍스트 모드를 전환하는 함수
+ * 텍스트 모드를 전환하는 함수 (동시 실행 방지 시스템 적용)
  * 기본 텍스트에서 동적 텍스트로, 또는 그 반대로 전환
  *
  * @param {string} targetMode - 전환할 모드 ('default' | 'dynamic')
  */
 const switchTextMode = async (targetMode) => {
-  // 이미 전환이 진행 중이면 중복 실행 방지
-  if (textChangeStateTracker.defaultTextTransitionInProgress) {
+  const operationName = `switchTextMode-${targetMode}`;
+
+  // 텍스트 변경 시작 시도
+  if (!startTextChange(operationName)) {
+    console.warn(`[WARN] ${operationName} aborted - another text is changing`);
     return;
   }
-
-  // 현재 모드와 같으면 전환할 필요 없음
-  if (textChangeStateTracker.currentTextMode === targetMode) {
-    return;
-  }
-
-  const defaultTextElement = getGlowDefaultTextElement();
-  const dynamicTextElement = getGlowTextElement();
-
-  if (!defaultTextElement || !dynamicTextElement) {
-    console.warn('[DEBUG] Text elements not found for mode switching');
-    return;
-  }
-
-  // 전환 진행 플래그 설정
-  textChangeStateTracker.defaultTextTransitionInProgress = true;
 
   try {
+    // DOM 상태 동기화
+    synchronizeTextStatesWithDOM();
+
+    // 이미 전환이 진행 중이면 중복 실행 방지
+    if (textChangeStateTracker.defaultTextTransitionInProgress) {
+      console.warn(
+        `[WARN] ${operationName} aborted - transition already in progress`
+      );
+      return;
+    }
+
+    // 현재 모드와 같으면 전환할 필요 없음
+    if (textChangeStateTracker.currentTextMode === targetMode) {
+      console.log(
+        `[DEBUG] ${operationName} skipped - already in ${targetMode} mode`
+      );
+      return;
+    }
+
+    const defaultTextElement = getGlowDefaultTextElement();
+    const dynamicTextElement = getGlowTextElement();
+
+    if (!defaultTextElement || !dynamicTextElement) {
+      console.warn('[DEBUG] Text elements not found for mode switching');
+      return;
+    }
+
+    // 전환 진행 플래그 설정
+    textChangeStateTracker.defaultTextTransitionInProgress = true;
+
     if (targetMode === 'dynamic') {
       // 기본 텍스트 → 동적 텍스트 모드로 전환
       console.log('[DEBUG] Switching to dynamic text mode');
@@ -256,7 +360,7 @@ const switchTextMode = async (targetMode) => {
     } else if (targetMode === 'default') {
       // 동적 텍스트 → 기본 텍스트 모드로 전환
       console.log(
-        '[DEBUG] Switching to default text mode (triggered by Pill state)'
+        '[DEBUG] Switching to default text mode (triggered by text change system)'
       );
 
       // 동적 텍스트가 보이고 있으면 먼저 숨김
@@ -277,16 +381,50 @@ const switchTextMode = async (targetMode) => {
       textChangeStateTracker.currentDisplayedText = '';
       textChangeStateTracker.previousScrollDirection = null;
     }
+
+    // 최종 DOM 상태 재동기화
+    synchronizeTextStatesWithDOM();
   } catch (switchError) {
     console.error('[ERROR] Text mode switching failed:', switchError);
   } finally {
     // 항상 전환 진행 플래그를 해제
     textChangeStateTracker.defaultTextTransitionInProgress = false;
+
+    // 텍스트 변경 완료
+    finishTextChange(operationName);
   }
 };
 
 /**
- * 스크롤 방향에 따라 텍스트를 업데이트하는 메인 함수 (Pill 상태 연동)
+ * 외부에서 기본 텍스트 모드로 전환하는 함수 (동시 실행 방지 시스템 적용)
+ * pillAnimations.js에서 Pill 상태 변경 시 즉시 호출됨
+ *
+ * @returns {Promise} 전환 완료 시 resolve되는 Promise
+ */
+export const defaultTextMode = async () => {
+  const operationName = 'defaultTextMode';
+
+  console.log('[DEBUG] Default text mode requested by Pill animation');
+
+  // 텍스트 변경 시작 시도
+  if (!startTextChange(operationName)) {
+    console.warn(`[WARN] ${operationName} aborted - another text is changing`);
+    return;
+  }
+
+  try {
+    // 기본 텍스트 모드로 즉시 전환
+    await switchTextMode('default');
+  } catch (defaultError) {
+    console.error('[ERROR] Default text mode failed:', defaultError);
+  } finally {
+    // 텍스트 변경 완료
+    finishTextChange(operationName);
+  }
+};
+
+/**
+ * 스크롤 방향에 따라 텍스트를 업데이트하는 메인 함수 (동시 실행 방지 시스템 적용)
  * 스크롤 진행률을 받아서 적절한 텍스트를 표시하거나 기본 텍스트로 복원
  *
  * @param {number} scrollProgressValue - 현재 스크롤 진행률 (0~1)
@@ -296,6 +434,18 @@ export const updateScrollDirectionText = async (
   scrollProgressValue,
   previousProgressValue = 0
 ) => {
+  const operationName = 'updateScrollDirectionText';
+
+  // 다른 텍스트 변경이 진행 중인지 빠른 확인 (50ms 이내 작업만 허용)
+  const currentTimestamp = Date.now();
+  if (
+    textChangeStateTracker.isTextChangingGoingOn &&
+    currentTimestamp - textChangeStateTracker.lastOperationTimestamp < 50
+  ) {
+    // 다른 작업이 너무 최근에 실행되었으면 스킵
+    return;
+  }
+
   // DOM 요소들 가져오기
   const textDisplayElement = getGlowTextElement();
   const defaultTextElement = getGlowDefaultTextElement();
@@ -315,7 +465,7 @@ export const updateScrollDirectionText = async (
   const shouldShowDefaultByPillState = shouldShowDefaultTextBasedOnPillState();
 
   if (shouldShowDefaultByPillState) {
-    // Pill 상태에 따라 기본 텍스트 모드로 전환
+    // Pill 상태에 따라 기본 텍스트 모드로 전환 (switchTextMode에서 텍스트 변경 관리)
     await switchTextMode('default');
     return;
   }
@@ -324,31 +474,37 @@ export const updateScrollDirectionText = async (
   // 기존 scrollProgressValue < 0.05 조건을 제거하여
   // 오직 Pill 애니메이션 상태에만 의존하도록 변경
 
-  // ===== 3순위: 동적 텍스트 모드로 전환 =====
+  // ===== 2순위: 동적 텍스트 모드로 전환 =====
   // 스크롤이 시작되었고 Pill이 활성 상태이면 동적 텍스트 모드로 전환
   if (textChangeStateTracker.currentTextMode === 'default') {
     await switchTextMode('dynamic');
   }
 
-  // ===== 기존 동적 텍스트 로직 (수정 없음) =====
+  // ===== 기존 동적 텍스트 로직 (동시 실행 방지 시스템 적용) =====
 
-  // 스크롤 방향 결정
-  const currentScrollDirection = determineScrollDirection(
-    scrollProgressValue,
-    previousProgressValue
-  );
-  // 해당 방향에 맞는 텍스트 가져오기
-  const targetTextContent = scrollTextMapping[currentScrollDirection];
-
-  // 업데이트가 불필요하면 종료
-  if (!shouldUpdateText(currentScrollDirection, targetTextContent)) {
+  // 텍스트 변경 시작 시도 (동적 텍스트 업데이트용)
+  if (!startTextChange(operationName)) {
+    // 텍스트 변경 시작 실패 시 조용히 스킵
     return;
   }
 
-  // 텍스트 전환 시작 플래그 설정
-  textChangeStateTracker.textTransitionInProgress = true;
-
   try {
+    // 스크롤 방향 결정
+    const currentScrollDirection = determineScrollDirection(
+      scrollProgressValue,
+      previousProgressValue
+    );
+    // 해당 방향에 맞는 텍스트 가져오기
+    const targetTextContent = scrollTextMapping[currentScrollDirection];
+
+    // 업데이트가 불필요하면 종료
+    if (!shouldUpdateText(currentScrollDirection, targetTextContent)) {
+      return;
+    }
+
+    // 텍스트 전환 시작 플래그 설정
+    textChangeStateTracker.textTransitionInProgress = true;
+
     // 동적 텍스트를 표시할 조건: 진행률이 10%~90% 사이
     // 너무 빠른 시점이나 늦은 시점에는 텍스트를 숨김
     const shouldShowDynamicText =
@@ -380,26 +536,19 @@ export const updateScrollDirectionText = async (
     console.log(
       `[DEBUG] Dynamic text updated: ${targetTextContent} (direction: ${currentScrollDirection})`
     );
+
+    // DOM 상태 동기화
+    synchronizeTextStatesWithDOM();
   } catch (textUpdateError) {
     // 에러 처리
     console.error('[ERROR] Dynamic text update failed:', textUpdateError);
   } finally {
     // 항상 전환 진행 플래그를 해제
     textChangeStateTracker.textTransitionInProgress = false;
+
+    // 텍스트 변경 완료
+    finishTextChange(operationName);
   }
-};
-
-/**
- * 외부에서 강제로 기본 텍스트 모드로 전환하는 함수
- * pillAnimations.js에서 Pill 상태 변경 시 즉시 호출됨
- *
- * @returns {Promise} 전환 완료 시 resolve되는 Promise
- */
-export const forceDefaultTextMode = async () => {
-  console.log('[DEBUG] Force default text mode requested by Pill animation');
-
-  // 기본 텍스트 모드로 즉시 전환
-  await switchTextMode('default');
 };
 
 /**

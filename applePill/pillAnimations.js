@@ -6,23 +6,21 @@ import {
   animationStateTracker,
 } from './config.js';
 
+// 정적 import로 텍스트 시스템 함수 가져오기
+import { defaultTextMode } from './textChangeSystem.js';
+
 /**
  * 텍스트 시스템에 즉시 기본 텍스트 모드로 전환을 요청하는 함수
  * Pill 상태 변경 시 즉각적인 텍스트 반응을 위해 사용
  */
 const requestDefaultTextModeSwitch = async () => {
   try {
-    // 동적 import를 사용하여 textChangeSystem 모듈 로드
-    const textSystemModule = await import('./textChangeSystem.js');
+    // 직접 함수 호출
+    await defaultTextMode();
 
-    // 기본 텍스트 모드로 즉시 전환 요청
-    await textSystemModule.forceDefaultTextMode();
-
-    console.log(
-      '[DEBUG] Forced switch to default text mode triggered by Pill state'
-    );
-  } catch (importError) {
-    console.warn('[WARN] Failed to trigger text mode switch:', importError);
+    console.log('[DEBUG] Switch to default text mode triggered by Pill state');
+  } catch (textModeError) {
+    console.warn('[WARN] Failed to trigger text mode switch:', textModeError);
   }
 };
 
